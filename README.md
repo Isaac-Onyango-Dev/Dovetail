@@ -25,28 +25,40 @@ detects as the real thing — no wrapper, no launch options, no per-game DLL.
 
 ---
 
-## Requirements
+## Install
 
-- Windows 10 or 11, x64
-- [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
+Download **`DovetailSetup-<version>.exe`** from the
+[latest release](https://github.com/Isaac-Onyango-Dev/Dovetail/releases/latest) and run it.
+
+That is the whole procedure. It installs to Program Files, adds a Start Menu entry and an
+Add/Remove Programs entry, and offers to start Dovetail when it finishes. There is no runtime
+to install first and nothing to unzip or keep track of — the .NET runtime is bundled.
+
+First run walks you through the two drivers and then calibrating your pad.
+
+A portable `.zip` is also attached to each release for anyone who would rather not install
+anything. If you use it, keep all three executables side by side: `Dovetail.exe` launches
+`dovetail-diag.exe` for calibration and `dovetail-engine.exe` for dependency work, and looks
+for them next to itself.
+
+### Requirements
+
+- Windows 10 or 11, x64. Nothing else.
 - **ViGEmBus** — the virtual controller driver. Without it there is no device to present.
 - **HidHide** — *required, not optional.* Without it the physical pad stays visible on
   DirectInput, and a game that polls both will bind to the raw pad and ignore Dovetail
   entirely while the engine is verifiably translating. This was found the hard way on the
   first real game tested.
 
-Dovetail installs both for you on first run. It runs as a normal user; only the dependency
-installer requests elevation, and only for its own process.
+Dovetail installs both drivers for you on first run. It runs as a normal user; only driver
+setup requests elevation, and only for its own process.
 
----
+### Uninstall
 
-## Install
-
-Download the latest release, unzip it, and run `Dovetail.exe`. First run offers to install any
-missing dependency and then walks you through calibrating your pad.
-
-All three executables must stay side by side — `Dovetail.exe` launches `dovetail-diag.exe` for
-calibration and `dovetail-engine.exe` for dependency work, and looks for them next to itself.
+Add/Remove Programs, or the Start Menu shortcut. The uninstaller reverses what Dovetail did to
+the machine — its auto-start entry, its own HidHide allow-list entries, and un-hiding any
+device Dovetail hid — and **keeps your calibration**, which lives in `%LOCALAPPDATA%\Dovetail`
+and costs a full input sweep per pad to recreate. ViGEmBus and HidHide are left installed.
 
 ---
 
@@ -73,8 +85,19 @@ dotnet build src/Dovetail.sln -c Release
 To stage a complete, runnable folder the way it is installed:
 
 ```powershell
-.\build-dist.ps1          # -> dist\Dovetail
+.\build-dist.ps1                       # -> dist\Dovetail  (self-contained, ~147 MB)
+.\build-dist.ps1 -FrameworkDependent   # -> ~2.7 MB, needs the .NET 8 runtime present
 ```
+
+To build the installer, with [Inno Setup 6](https://jrsoftware.org/isdl.php) installed:
+
+```powershell
+ISCC.exe /DAppVersion=1.1.0 packaging\Dovetail.iss   # -> dist\DovetailSetup-1.1.0.exe
+```
+
+CI does both on every tag and attaches the results to the release. The tag and the `<Version>`
+in the projects must agree or the workflow fails, so the version in Add/Remove Programs can
+never disagree with the version on the release page.
 
 ### Tests
 
@@ -132,11 +155,14 @@ diagnose in-game than one that plainly does not appear.
 
 ---
 
-## Uninstall
+## Uninstall from the command line
+
+Add/Remove Programs calls the first of these for you. Run them directly to see what an
+uninstall would touch before committing to it, or to reverse one afterwards.
 
 ```powershell
-dovetail-engine uninstall plan      # what would be removed
-dovetail-engine uninstall run       # remove it, writing a restore point
+dovetail-engine uninstall plan      # what would be removed, changing nothing
+dovetail-engine uninstall run       # remove it, writing a restore point first
 dovetail-engine uninstall restore   # put it all back
 ```
 

@@ -52,26 +52,81 @@ jobs:
           src/Dovetail.Engine/bin/x64/Release/net8.0-windows/dovetail-engine.exe
           stage5 --dir tests/fixtures/profiles
 
+      # A tag must agree with the version in the projects, because that version is what ends
+      # up in the installer, in Add/Remove Programs and in the file details. Catching the
+      # mismatch here beats shipping a v1.2.0 release that reports 1.1.0 on the user's machine.
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        run: |
+          $xml  = [xml](Get-Content src/Dovetail.App/Dovetail.App.csproj)
+          $proj = @($xml.Project.PropertyGroup.Version | Where-Object { $_ })[0].Trim()
+
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $tag = $env:GITHUB_REF_NAME
+            $ver = $tag.Substring(1)
+            if ($ver -ne $proj) {
+              throw "tag $tag says $ver but the projects say $proj; bump the csproj Version or retag"
+            }
+          } else {
+            $tag = 'ci-' + $env:GITHUB_SHA.Substring(0,7)
+            $ver = $proj
+          }
+          "tag=$tag" | Out-File $env:GITHUB_OUTPUT -Append
+          "ver=$ver" | Out-File $env:GITHUB_OUTPUT -Append
+          Write-Host "tag=$tag version=$ver"
+
       # Packaging is a test in its own right: it is the step that proves all three executables
-      # publish and land side by side, which is how they have to be installed.
+      # publish and land side by side, which is how they have to be installed. Self-contained,
+      # so the installed product needs no .NET runtime on the machine.
       - name: Stage the distribution
         run: .\build-dist.ps1
+
+      # Pinned to an exact release rather than "latest" or a package manager, so what ships is
+      # reproducible and an upstream change cannot silently alter the installer. The runner
+      # does not carry Inno Setup.
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          $url = 'https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe'
+          Invoke-WebRequest -Uri $url -OutFile "$env:RUNNER_TEMP\innosetup.exe"
+          $p = Start-Process -FilePath "$env:RUNNER_TEMP\innosetup.exe" `
+                 -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Inno Setup install failed with $($p.ExitCode)" }
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { throw "ISCC.exe not found at $iscc" }
+          "ISCC=$iscc" | Out-File $env:GITHUB_ENV -Append
 
       - name: Package
         id: package
         shell: pwsh
         run: |
-          $tag = if ($env:GITHUB_REF -like 'refs/tags/*') { $env:GITHUB_REF_NAME } else { 'ci-' + $env:GITHUB_SHA.Substring(0,7) }
-          $zip = "Dovetail-$tag-win-x64.zip"
+          $tag = '${{ steps.ver.outputs.tag }}'
+          $ver = '${{ steps.ver.outputs.ver }}'
+
+          # The installer is the headline download; the zip stays for anyone who wants a
+          # portable copy they can drop on a stick and run without installing anything.
+          & $env:ISCC /DAppVersion=$ver packaging\Dovetail.iss
+          if ($LASTEXITCODE -ne 0) { throw "the installer failed to compile" }
+
+          $setup = "DovetailSetup-$ver.exe"
+          if (-not (Test-Path "dist\$setup")) { throw "expected dist\$setup, which is not there" }
+          Move-Item "dist\$setup" $setup -Force
+
+          $zip = "Dovetail-$tag-win-x64-portable.zip"
           Compress-Archive -Path dist\Dovetail\* -DestinationPath $zip -Force
-          "zip=$zip"  | Out-File $env:GITHUB_OUTPUT -Append
-          "tag=$tag"  | Out-File $env:GITHUB_OUTPUT -Append
-          Write-Host "packaged $zip"
+
+          "setup=$setup" | Out-File $env:GITHUB_OUTPUT -Append
+          "zip=$zip"     | Out-File $env:GITHUB_OUTPUT -Append
+          "{0,-40} {1,8:N1} MB" -f $setup, ((Get-Item $setup).Length/1MB) | Write-Host
+          "{0,-40} {1,8:N1} MB" -f $zip,   ((Get-Item $zip).Length/1MB)   | Write-Host
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.package.outputs.tag }}-win-x64
-          path: ${{ steps.package.outputs.zip }}
+          name: ${{ steps.ver.outputs.tag }}-win-x64
+          path: |
+            ${{ steps.package.outputs.setup }}
+            ${{ steps.package.outputs.zip }}
           if-no-files-found: error
 
       # Tags only. Uses the gh CLI preinstalled on the runner rather than a third-party action,
@@ -83,6 +138,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $tag   = $env:GITHUB_REF_NAME
+          $setup = '${{ steps.package.outputs.setup }}'
           $zip   = '${{ steps.package.outputs.zip }}'
           $notes = "docs/release-notes/$tag.md"
 
@@ -90,8 +146,8 @@ jobs:
           # future tag still produces a release rather than failing on a missing file.
           if (Test-Path $notes) {
             Write-Host "using $notes"
-            gh release create $tag $zip --title "Dovetail $tag" --notes-file $notes
+            gh release create $tag $setup $zip --title "Dovetail $tag" --notes-file $notes
           } else {
             Write-Host "no notes file at $notes, generating from commits"
-            gh release create $tag $zip --title "Dovetail $tag" --generate-notes
+            gh release create $tag $setup $zip --title "Dovetail $tag" --generate-notes
           }

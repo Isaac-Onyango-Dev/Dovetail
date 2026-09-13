@@ -28,13 +28,18 @@
          throws CultureNotFoundException in invariant mode and takes the process down before
          any window appears. Verified by the crash it caused, see Findings Log 5.4. -->
     <InvariantGlobalization>false</InvariantGlobalization>
+    <!-- WPF and WinForms ship localised resource assemblies for their own exception text in
+         13 languages. A self-contained publish copies all of them, and the application is
+         English-only, so they are 13 folders of weight nobody reads. This drops them without
+         touching InvariantGlobalization, which WPF genuinely needs. -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <!-- Shown in Task Manager and in the file's Details tab. The AssemblyName, the two
          console tools, the mutex and the auto-start value were all renamed together in the
          packaging step, so nothing user-visible still says Bridge. -->
     <Product>Dovetail</Product>
     <AssemblyTitle>Dovetail Gamepad Emulator</AssemblyTitle>
     <Company>Dovetail</Company>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

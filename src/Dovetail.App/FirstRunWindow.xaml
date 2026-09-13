@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Style="{StaticResource AppWindow}"
         Title="Dovetail - first-time setup"
-        MinWidth="560" MinHeight="420"
-        ResizeMode="CanMinimize">
+        MinWidth="600" MinHeight="560"
+        ResizeMode="CanResize">
 
   <Grid Margin="22">
     <Grid.RowDefinitions>
@@ -89,10 +89,20 @@
       </StackPanel>
     </ScrollViewer>
 
+    <!-- Two columns, not one cell with both children in it. Sharing a cell let the blocker
+         text run underneath the button, which paints over it because it is declared second:
+         the last words of the sentence disappeared and the button looked unclickable. The
+         button sizes to its content and the message gets whatever is left. -->
     <Grid Grid.Row="2" Margin="0,14,0,0">
-      <TextBlock x:Name="Blocker" Style="{StaticResource Dim}" VerticalAlignment="Center"/>
-      <Button x:Name="FinishBtn" Style="{StaticResource Primary}" Content="Finish setup"
-              HorizontalAlignment="Right" Click="Finish_Click" IsEnabled="False"/>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock x:Name="Blocker" Grid.Column="0" Style="{StaticResource Dim}"
+                 TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,14,0"/>
+      <Button x:Name="FinishBtn" Grid.Column="1" Style="{StaticResource Primary}"
+              Content="Finish setup" VerticalAlignment="Center"
+              Click="Finish_Click" IsEnabled="False"/>
     </Grid>
   </Grid>
 </Window>

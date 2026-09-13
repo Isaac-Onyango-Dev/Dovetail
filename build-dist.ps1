@@ -9,7 +9,13 @@
 #>
 param(
     [string]$Configuration = 'Release',
-    [string]$Output = "$PSScriptRoot\dist\Dovetail"
+    [string]$Output = "$PSScriptRoot\dist\Dovetail",
+
+    # Self-contained is what ships. A framework-dependent folder is 2.7 MB against 163 MB,
+    # but it needs the .NET 8 Desktop Runtime already on the machine, and "go and install a
+    # runtime first" is a dead end for the people this product is for. Use this switch for a
+    # fast local stage when you already have the runtime; never for a release.
+    [switch]$FrameworkDependent
 )
 
 $ErrorActionPreference = 'Stop'
@@ -36,13 +42,20 @@ if (Test-Path $Output) {
 }
 New-Item -ItemType Directory -Path $Output -Force | Out-Null
 
+# Dovetail.App goes first on purpose. All three publish into one folder and share a single
+# copy of the runtime; the app is the only one that needs the WPF assemblies, and publishing
+# it first means the console tools add their own files to a folder that is already complete
+# rather than the other way round.
+$selfContained = (-not $FrameworkDependent).ToString().ToLowerInvariant()
+Write-Host ("publishing self-contained: $selfContained") -ForegroundColor DarkGray
+
 foreach ($proj in 'Dovetail.App', 'Dovetail.Engine', 'Dovetail.Diagnostics') {
     Write-Host "publishing $proj" -ForegroundColor Cyan
     # Captured rather than streamed so a failure can print everything. Filtering the live
     # output was hiding the compiler errors behind the throw, which made a broken build look
     # like a mysterious script failure.
     $log = & $dotnet publish "$PSScriptRoot\src\$proj\$proj.csproj" `
-        -c $Configuration -r win-x64 --self-contained false `
+        -c $Configuration -r win-x64 --self-contained $selfContained `
         -p:PublishSingleFile=false -p:DebugType=none `
         -o $Output --nologo 2>&1
     if ($LASTEXITCODE -ne 0) {

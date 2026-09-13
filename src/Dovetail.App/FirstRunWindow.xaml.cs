@@ -41,7 +41,11 @@ public partial class FirstRunWindow : Window
     public FirstRunWindow(DovetailService service)
     {
         InitializeComponent();
-        WindowPlacement.CentreAndFit(this, 720, 620);
+        // 620 was too short for three cards plus the footer, so the window opened with step 1
+        // scrolled out of sight and the blocker message told the user to press a button they
+        // could not see. CentreAndFit clamps to the work area, so asking for 820 costs nothing
+        // on a screen that cannot give it.
+        WindowPlacement.CentreAndFit(this, 760, 820);
         _service = service;
         NameList.ItemsSource = _names;
         RefreshDependencies();
