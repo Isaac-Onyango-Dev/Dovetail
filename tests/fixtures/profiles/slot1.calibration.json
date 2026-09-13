@@ -1,0 +1,252 @@
+{
+  "SchemaVersion": 1,
+  "Name": "slot1",
+  "CreatedLocal": "2026-01-01T00:00:00+00:00",
+  "Tool": "dovetail-diag calibrate",
+  "SlotNumber": 1,
+  "DisplayName": "Fixture Pad 1",
+  "EffectiveName": "Fixture Pad 1",
+  "Device": {
+    "Vid": "0x0000",
+    "Pid": "0x0000",
+    "Product": "Generic HID Gamepad",
+    "Manufacturer": "Fixture",
+    "CollectionTag": "COL01",
+    "ReportId": 1,
+    "InstanceId": "HID\\VID_0000&PID_0000&COL01\\0&0&0001",
+    "DevicePath": "\\\\?\\hid#vid_0000&pid_0000&col01#0&0&0001",
+    "InputReportByteLength": 8,
+    "RestState": "01 80 80 80 80 0F 00 00",
+    "SelectionRule": "Fixture device. Never matched against real hardware."
+  },
+  "Axes": {
+    "leftStickX": {
+      "Byte": 3,
+      "HidUsage": "X",
+      "Centre": 128,
+      "Min": 0,
+      "Max": 255,
+      "RestNoise": 0,
+      "Deadzone": 4,
+      "InvertForXInput": false,
+      "FullRangeReached": true,
+      "AntiDeadzone": 7849,
+      "ResponseCurve": 1.0,
+      "Saturation": 100
+    },
+    "leftStickY": {
+      "Byte": 4,
+      "HidUsage": "Y",
+      "Centre": 128,
+      "Min": 0,
+      "Max": 255,
+      "RestNoise": 0,
+      "Deadzone": 4,
+      "InvertForXInput": true,
+      "FullRangeReached": true,
+      "AntiDeadzone": 7849,
+      "ResponseCurve": 1.0,
+      "Saturation": 100
+    },
+    "rightStickX": {
+      "Byte": 1,
+      "HidUsage": "Z",
+      "Centre": 128,
+      "Min": 0,
+      "Max": 255,
+      "RestNoise": 0,
+      "Deadzone": 4,
+      "InvertForXInput": false,
+      "FullRangeReached": true,
+      "AntiDeadzone": 8689,
+      "ResponseCurve": 1.0,
+      "Saturation": 100
+    },
+    "rightStickY": {
+      "Byte": 2,
+      "HidUsage": "Rz",
+      "Centre": 128,
+      "Min": 0,
+      "Max": 255,
+      "RestNoise": 0,
+      "Deadzone": 4,
+      "InvertForXInput": true,
+      "FullRangeReached": true,
+      "AntiDeadzone": 8689,
+      "ResponseCurve": 1.0,
+      "Saturation": 100
+    }
+  },
+  "Buttons": {
+    "triangle": {
+      "Byte": 5,
+      "Bit": 4,
+      "HidButton": 1,
+      "XInput": "Y",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "circle": {
+      "Byte": 5,
+      "Bit": 5,
+      "HidButton": 2,
+      "XInput": "B",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "cross": {
+      "Byte": 5,
+      "Bit": 6,
+      "HidButton": 3,
+      "XInput": "A",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "square": {
+      "Byte": 5,
+      "Bit": 7,
+      "HidButton": 4,
+      "XInput": "X",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "l1": {
+      "Byte": 6,
+      "Bit": 0,
+      "HidButton": 5,
+      "XInput": "LeftShoulder",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "r1": {
+      "Byte": 6,
+      "Bit": 1,
+      "HidButton": 6,
+      "XInput": "RightShoulder",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "l2": {
+      "Byte": 6,
+      "Bit": 2,
+      "HidButton": 7,
+      "XInput": "LeftTrigger",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "r2": {
+      "Byte": 6,
+      "Bit": 3,
+      "HidButton": 8,
+      "XInput": "RightTrigger",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "l3": {
+      "Byte": 6,
+      "Bit": 6,
+      "HidButton": 11,
+      "XInput": "LeftThumb",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "r3": {
+      "Byte": 6,
+      "Bit": 7,
+      "HidButton": 12,
+      "XInput": "RightThumb",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "select": {
+      "Byte": 6,
+      "Bit": 4,
+      "HidButton": 9,
+      "XInput": "Back",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "start": {
+      "Byte": 6,
+      "Bit": 5,
+      "HidButton": 10,
+      "XInput": "Start",
+      "VendorDefined": false,
+      "Verified": true
+    },
+    "home": {
+      "Byte": 7,
+      "Bit": 4,
+      "HidButton": null,
+      "XInput": "Guide",
+      "VendorDefined": true,
+      "Verified": true
+    },
+    "android_menu": {
+      "Byte": 7,
+      "Bit": 5,
+      "HidButton": null,
+      "XInput": "",
+      "VendorDefined": true,
+      "Verified": true
+    },
+    "android_back": {
+      "Byte": 7,
+      "Bit": 6,
+      "HidButton": null,
+      "XInput": "",
+      "VendorDefined": true,
+      "Verified": true
+    }
+  },
+  "Hat": {
+    "Byte": 5,
+    "BitOffset": 0,
+    "BitCount": 4,
+    "NullValue": 15,
+    "Directions": {
+      "up": 0,
+      "upRight": 1,
+      "right": 2,
+      "downRight": 3,
+      "down": 4,
+      "downLeft": 5,
+      "left": 6,
+      "upLeft": 7
+    },
+    "ValuesObserved": []
+  },
+  "Triggers": {
+    "DigitalOnly": true,
+    "HeldValue": 255,
+    "ReleasedValue": 0,
+    "LeftVerified": true,
+    "RightVerified": true,
+    "Rationale": "All four 8-bit axes are consumed by the two sticks, so L2/R2 carry no analog value. XInput trigger bytes are synthesised from the button bits."
+  },
+  "StickClicks": {
+    "Left": {
+      "HoldPassed": true,
+      "HoldMillisecondsObserved": 3000,
+      "TapsRequested": 5,
+      "TapsDetected": 5,
+      "TapsPassed": true,
+      "MaxAxisDisturbance": 0,
+      "Isolated": true,
+      "Note": "fixture value"
+    },
+    "Right": {
+      "HoldPassed": true,
+      "HoldMillisecondsObserved": 3000,
+      "TapsRequested": 5,
+      "TapsDetected": 5,
+      "TapsPassed": true,
+      "MaxAxisDisturbance": 0,
+      "Isolated": true,
+      "Note": "fixture value"
+    }
+  },
+  "Notes": [
+    "Synthetic test fixture, not a measurement of any real device. The identity fields are placeholders and the values are the nominal range for an 8-bit HID gamepad. This exists so 'dovetail-engine selftest' and 'dovetail-engine stage5' can run on a clean machine that has never had a controller calibrated. It is never shipped as a first-run seed."
+  ]
+}

@@ -1,0 +1,73 @@
+# ---------------------------------------------------------------------------
+# Build output
+# ---------------------------------------------------------------------------
+bin/
+obj/
+/dist/
+*.user
+*.suo
+.vs/
+
+# ---------------------------------------------------------------------------
+# Measured calibration data
+#
+# profiles/ holds real measurements of real hardware, including the device
+# instance path of the machine that made them. It is per-operator data, it is
+# recreated by running 'dovetail-diag calibrate', and a live build reads it
+# from %LOCALAPPDATA%\Dovetail\profiles rather than from here anyway.
+#
+# The synthetic pair under tests/fixtures/profiles is deliberately NOT ignored:
+# it is what selftest and stage5 run against on a clean machine.
+#
+# The FOLDER is kept and only its contents are ignored, which is load-bearing
+# rather than cosmetic. ProfileStore.DevelopmentTree() identifies a build tree
+# by an ancestor named 'src' with a 'profiles' folder beside it, and that is
+# the signal that makes a dev run read the repository's own profiles instead of
+# %LOCALAPPDATA%. Ignoring the directory outright removes the signal from a
+# fresh clone, and stage5 fails on it.
+# ---------------------------------------------------------------------------
+/profiles/*
+!/profiles/.gitkeep
+
+# ---------------------------------------------------------------------------
+# Dev-only harnesses and their output
+#
+# These drive the manual validation passes. They carry absolute host paths,
+# they need a controller or a Windows Sandbox, and none of them is part of the
+# shipped product. The automated suite is not here: selftest and stage5 are
+# compiled into dovetail-engine and run in CI.
+# ---------------------------------------------------------------------------
+/artifacts/
+/sandbox/
+/_rollback/
+attach-live-pass.ps1
+record-live-pass.ps1
+
+# ---------------------------------------------------------------------------
+# Third-party reference material
+#
+# DS4Windows and x360ce source snapshots kept for comparison during the audit,
+# plus _quarantined/, which holds an unsigned third-party DS4Windows rebrand of
+# unestablished provenance. None of it is ours to redistribute and none of it
+# is needed to build.
+# ---------------------------------------------------------------------------
+/References/
+
+# ---------------------------------------------------------------------------
+# Source artwork
+#
+# assets/intro/ IS tracked: those renders are compiled into Dovetail.exe as WPF
+# resources and the app will not build without them. What is ignored here is
+# the raw source material they were cut from.
+# ---------------------------------------------------------------------------
+assets/*.mp4
+assets/*.jfif
+assets/*.psd
+
+# ---------------------------------------------------------------------------
+# Editor and OS noise
+# ---------------------------------------------------------------------------
+Thumbs.db
+desktop.ini
+.DS_Store
+*.swp

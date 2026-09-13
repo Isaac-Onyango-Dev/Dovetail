@@ -1,0 +1,5 @@
+# Keeps the profiles folder present in a checkout while its contents stay ignored.
+#
+# A checkout of this repository IS a development tree, and ProfileStore.DevelopmentTree()
+# recognises one by this folder sitting beside src/. Measured calibration is per-operator
+# data and is never committed; run 'dovetail-diag calibrate' to populate this folder.

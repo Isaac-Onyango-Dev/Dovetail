@@ -1,0 +1,354 @@
+<Application x:Class="Dovetail.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+  <Application.Resources>
+
+    <!-- Section 5.6: the Dovetail palette, defined once. Nothing else in the UI hardcodes
+         a colour, so the whole theme moves from here.
+
+         Ember and Board are sampled out of the project's own controller artwork rather than
+         picked: the rings around both analogue sticks read #C23C35 and #B03E3C, and the PCB
+         in the exploded view reads #547659. Both are lifted in value so they hold contrast
+         against Bg and at 16 px in the notification area, where the taskbar may be either
+         colour. The greys stay deliberately cooler than the shell, which samples warm around
+         #31312F, so the warm artwork reads as an object sitting on a cool interface. -->
+    <SolidColorBrush x:Key="Ink"      Color="#12151A"/>
+    <SolidColorBrush x:Key="Bg"       Color="#1E2127"/>
+    <SolidColorBrush x:Key="Panel"    Color="#282C34"/>
+    <SolidColorBrush x:Key="Line"     Color="#3A3F4B"/>
+    <SolidColorBrush x:Key="Text"     Color="#E9E6E1"/>
+    <SolidColorBrush x:Key="TextDim"  Color="#9BA1AC"/>
+    <SolidColorBrush x:Key="Accent"   Color="#D9483B"/>
+    <SolidColorBrush x:Key="Good"     Color="#6FA36B"/>
+    <SolidColorBrush x:Key="Warn"     Color="#D8A657"/>
+
+    <!-- The Dovetail mark. One definition for every window, and the same geometry the tray
+         icon draws in TrayIcon.MarkHalf: a block split by one angled cut, on a 32 x 32 grid.
+         Kept as a brush rather than a shipped .png so it stays sharp at any DPI and there is
+         no image file to lose. -->
+    <DrawingBrush x:Key="Mark" Stretch="Uniform">
+      <DrawingBrush.Drawing>
+        <DrawingGroup>
+          <GeometryDrawing Brush="#D9483B"
+            Geometry="M14.8,0 L14.8,12.36 L8.8,16.36 L8.8,32 L6,32 A6,6 0 0 1 0,26 L0,6 A6,6 0 0 1 6,0 Z"/>
+          <GeometryDrawing Brush="#D9483B"
+            Geometry="M17.2,0 L17.2,13.64 L11.2,17.64 L11.2,32 L26,32 A6,6 0 0 0 32,26 L32,6 A6,6 0 0 0 26,0 Z"/>
+        </DrawingGroup>
+      </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+    <!-- Keyed, and named explicitly by every window, rather than left as an implicit
+         TargetType="Window" style. An implicit style is keyed on the element's exact runtime
+         type, so it reaches a bare Window and not a FirstRunWindow or a CalibrationWindow that
+         derives from one. The result is the worst kind of theming bug: the keyed styles inside
+         the window all apply, so the cards and buttons look right, while the window's own
+         background stays default white and the light body text on it becomes unreadable.
+         The same trap is noted below for the keyed TextBlock styles. -->
+    <Style x:Key="AppWindow" TargetType="Window">
+      <Setter Property="Background" Value="{StaticResource Bg}"/>
+      <Setter Property="Foreground" Value="{StaticResource Text}"/>
+      <Setter Property="FontFamily" Value="Segoe UI"/>
+      <Setter Property="FontSize" Value="13"/>
+    </Style>
+
+    <Style TargetType="TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Text}"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <!-- Every keyed TextBlock style below must say BasedOn explicitly. WPF does not apply
+         the implicit style for a type to a keyed style of that type, so without this they
+         lose TextWrapping and render one clipped line instead of a wrapped paragraph. -->
+    <Style x:Key="Heading" TargetType="TextBlock"
+           BasedOn="{StaticResource {x:Type TextBlock}}">
+      <Setter Property="FontSize" Value="19"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Margin" Value="0,0,0,6"/>
+    </Style>
+
+    <Style x:Key="Dim" TargetType="TextBlock"
+           BasedOn="{StaticResource {x:Type TextBlock}}">
+      <Setter Property="Foreground" Value="{StaticResource TextDim}"/>
+    </Style>
+
+    <!-- The name set as a wordmark rather than as a heading. Lowercase and bold, so it reads
+         as an identity and not as the first line of the page it sits on. -->
+    <Style x:Key="Wordmark" TargetType="TextBlock"
+           BasedOn="{StaticResource {x:Type TextBlock}}">
+      <Setter Property="FontSize" Value="25"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="Tagline" TargetType="TextBlock"
+           BasedOn="{StaticResource {x:Type TextBlock}}">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="{StaticResource TextDim}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Margin" Value="12,4,0,0"/>
+    </Style>
+
+    <Style x:Key="Mono" TargetType="TextBlock"
+           BasedOn="{StaticResource {x:Type TextBlock}}">
+      <Setter Property="FontFamily" Value="Consolas"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="{StaticResource TextDim}"/>
+    </Style>
+
+    <Style TargetType="Button">
+      <Setter Property="Background" Value="{StaticResource Panel}"/>
+      <Setter Property="Foreground" Value="{StaticResource Text}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="14,7"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="4">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Margin="{TemplateBinding Padding}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Background" Value="#333845"/>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="Primary" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+      <Setter Property="Background" Value="{StaticResource Accent}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <Style TargetType="CheckBox">
+      <Setter Property="Foreground" Value="{StaticResource Text}"/>
+      <Setter Property="Margin" Value="0,5"/>
+    </Style>
+
+    <Style TargetType="TextBox">
+      <Setter Property="Background" Value="{StaticResource Panel}"/>
+      <Setter Property="Foreground" Value="{StaticResource Text}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="6,4"/>
+      <Setter Property="CaretBrush" Value="{StaticResource Text}"/>
+    </Style>
+
+    <!-- Tabs need a template of their own. The stock TabItem paints a light system
+         gradient behind its header, and the implicit TextBlock style above sets a light
+         foreground, so unselected tabs came out light-on-light and were unreadable. -->
+    <!-- TabControl needs its own template, not just a Background setter. The stock template
+         paints the content area with a system theme brush rather than with the control's
+         Background, which left every tab page sitting on white; a light grey label on white
+         was all but invisible. Setting Background="Transparent" does not help, because that
+         brush is never consulted. -->
+    <Style TargetType="TabControl">
+      <Setter Property="Background" Value="{StaticResource Bg}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="TabControl">
+            <Grid Background="{TemplateBinding Background}">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+              </Grid.RowDefinitions>
+              <Border Grid.Row="0" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1">
+                <TabPanel IsItemsHost="True" Panel.ZIndex="1" HorizontalAlignment="Left"/>
+              </Border>
+              <ContentPresenter Grid.Row="1" ContentSource="SelectedContent"/>
+            </Grid>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style TargetType="TabItem">
+      <Setter Property="Foreground" Value="{StaticResource TextDim}"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="TabItem">
+            <Border x:Name="tab" Background="Transparent" BorderThickness="0,0,0,2"
+                    BorderBrush="Transparent" Padding="14,8" Margin="0,0,4,0">
+              <ContentPresenter ContentSource="Header"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <!-- The selected tab is marked by an accent underline rather than by a filled
+                   background, so the header row stays quiet next to the cards below it. -->
+              <Trigger Property="IsSelected" Value="True">
+                <Setter TargetName="tab" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                <Setter Property="Foreground" Value="{StaticResource Text}"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+              </Trigger>
+              <MultiTrigger>
+                <MultiTrigger.Conditions>
+                  <Condition Property="IsMouseOver" Value="True"/>
+                  <Condition Property="IsSelected" Value="False"/>
+                </MultiTrigger.Conditions>
+                <Setter TargetName="tab" Property="Background" Value="{StaticResource Panel}"/>
+                <Setter Property="Foreground" Value="{StaticResource Text}"/>
+              </MultiTrigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Slider and ComboBox both need full templates, for the reason already recorded against
+         TabItem and TabControl: the stock templates paint themselves with system theme brushes
+         rather than with the control's Background, and the implicit TextBlock style above is a
+         light foreground. Left alone they render light-on-light and are unreadable. -->
+    <Style TargetType="Slider">
+      <Setter Property="Height" Value="20"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="IsMoveToPointEnabled" Value="True"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Slider">
+            <Grid VerticalAlignment="Center" Background="Transparent">
+              <Border Height="4" CornerRadius="2" VerticalAlignment="Center"
+                      Background="{StaticResource Line}"/>
+              <Track x:Name="PART_Track">
+                <Track.DecreaseRepeatButton>
+                  <RepeatButton Command="Slider.DecreaseLarge" Focusable="False">
+                    <RepeatButton.Template>
+                      <ControlTemplate TargetType="RepeatButton">
+                        <Border Height="4" CornerRadius="2" VerticalAlignment="Center"
+                                Background="{StaticResource Accent}"/>
+                      </ControlTemplate>
+                    </RepeatButton.Template>
+                  </RepeatButton>
+                </Track.DecreaseRepeatButton>
+                <Track.IncreaseRepeatButton>
+                  <RepeatButton Command="Slider.IncreaseLarge" Focusable="False">
+                    <RepeatButton.Template>
+                      <ControlTemplate TargetType="RepeatButton">
+                        <Border Background="Transparent"/>
+                      </ControlTemplate>
+                    </RepeatButton.Template>
+                  </RepeatButton>
+                </Track.IncreaseRepeatButton>
+                <Track.Thumb>
+                  <Thumb Width="14" Height="14">
+                    <Thumb.Template>
+                      <ControlTemplate TargetType="Thumb">
+                        <Ellipse Fill="{StaticResource Text}"
+                                 Stroke="{StaticResource Accent}" StrokeThickness="2"/>
+                      </ControlTemplate>
+                    </Thumb.Template>
+                  </Thumb>
+                </Track.Thumb>
+              </Track>
+            </Grid>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style TargetType="ComboBoxItem">
+      <Setter Property="Foreground" Value="{StaticResource Text}"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Padding" Value="8,5"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ComboBoxItem">
+            <Border x:Name="Chip" Background="{TemplateBinding Background}"
+                    Padding="{TemplateBinding Padding}">
+              <ContentPresenter/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsHighlighted" Value="True">
+                <Setter TargetName="Chip" Property="Background" Value="{StaticResource Accent}"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- NOTE FOR CALLERS: set ItemTemplate, not DisplayMemberPath. This template renders the
+         selected value through SelectionBoxItemTemplate, which DisplayMemberPath leaves null,
+         and the ContentPresenter then falls back to the bound object's ToString. On a record
+         that prints the whole "Preset { Id = standard, Label = ... }" dump into the box. Both
+         call sites in this app hit it and both are fixed by an explicit ItemTemplate. -->
+    <Style TargetType="ComboBox">
+      <Setter Property="Foreground" Value="{StaticResource Text}"/>
+      <Setter Property="Background" Value="{StaticResource Panel}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+      <Setter Property="Padding" Value="8,4"/>
+      <Setter Property="Height" Value="28"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ComboBox">
+            <Grid>
+              <ToggleButton Focusable="False" ClickMode="Press"
+                            IsChecked="{Binding IsDropDownOpen, Mode=TwoWay,
+                                                RelativeSource={RelativeSource TemplatedParent}}">
+                <ToggleButton.Template>
+                  <ControlTemplate TargetType="ToggleButton">
+                    <Border Background="{StaticResource Panel}" CornerRadius="4"
+                            BorderBrush="{StaticResource Line}" BorderThickness="1">
+                      <Path HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Margin="0,0,9,0" Data="M0,0 L8,0 L4,5 Z"
+                            Fill="{StaticResource TextDim}"/>
+                    </Border>
+                  </ControlTemplate>
+                </ToggleButton.Template>
+              </ToggleButton>
+              <!-- Full bindings, not TemplateBinding. SelectionBoxItem and its template are
+                   set by the ComboBox after the template is applied, and a TemplateBinding
+                   does not pick that up: the box then renders the bound object's ToString
+                   instead of the DisplayMemberPath property, which for a record is its whole
+                   "Preset { Id = standard, Label = ... }" dump. Seen on screen, not guessed. -->
+              <ContentPresenter IsHitTestVisible="False"
+                                Content="{Binding SelectionBoxItem,
+                                                  RelativeSource={RelativeSource TemplatedParent}}"
+                                ContentTemplate="{Binding SelectionBoxItemTemplate,
+                                                          RelativeSource={RelativeSource TemplatedParent}}"
+                                Margin="{TemplateBinding Padding}"
+                                VerticalAlignment="Center" HorizontalAlignment="Left"/>
+              <Popup IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom"
+                     AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                <Border Background="{StaticResource Panel}" CornerRadius="4"
+                        BorderBrush="{StaticResource Line}" BorderThickness="1"
+                        MinWidth="{Binding ActualWidth,
+                                           RelativeSource={RelativeSource TemplatedParent}}"
+                        MaxHeight="320">
+                  <ScrollViewer>
+                    <StackPanel IsItemsHost="True"
+                                KeyboardNavigation.DirectionalNavigation="Contained"/>
+                  </ScrollViewer>
+                </Border>
+              </Popup>
+            </Grid>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="Card" TargetType="Border">
+      <Setter Property="Background" Value="{StaticResource Panel}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="Padding" Value="14"/>
+      <Setter Property="Margin" Value="0,0,0,10"/>
+    </Style>
+
+  </Application.Resources>
+</Application>

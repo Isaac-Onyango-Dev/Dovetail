@@ -1,0 +1,98 @@
+<Window x:Class="Dovetail.App.FirstRunWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Style="{StaticResource AppWindow}"
+        Title="Dovetail - first-time setup"
+        MinWidth="560" MinHeight="420"
+        ResizeMode="CanMinimize">
+
+  <Grid Margin="22">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="0,0,0,14">
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <Rectangle Width="30" Height="30" Fill="{StaticResource Mark}"
+                   VerticalAlignment="Center" Margin="0,0,11,0"/>
+        <TextBlock Style="{StaticResource Wordmark}" Text="dovetail"/>
+        <TextBlock Style="{StaticResource Tagline}" Text="Fits your pad to the game"/>
+      </StackPanel>
+      <TextBlock Style="{StaticResource Heading}" Text="First-time setup"/>
+      <TextBlock Style="{StaticResource Dim}"
+                 Text="Three steps. The window stays open until setup is done, then Dovetail moves to the notification area and stays out of the way."/>
+    </StackPanel>
+
+    <ScrollViewer x:Name="Steps" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel>
+
+        <!-- Step 1: dependencies -->
+        <Border Style="{StaticResource Card}">
+          <StackPanel>
+            <TextBlock FontWeight="SemiBold" FontSize="15" Text="1. Driver"/>
+            <TextBlock Style="{StaticResource Dim}" Margin="0,4,0,10"
+                       Text="Dovetail needs the ViGEmBus virtual controller driver. It creates the Xbox-style controller that games actually read. Nothing to download by hand."/>
+            <TextBlock x:Name="DepStatus" Style="{StaticResource Mono}" Text="Checking..."/>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+              <Button x:Name="DepSetupBtn" Style="{StaticResource Primary}"
+                      Content="Set up now" Click="DepSetup_Click" Margin="0,0,8,0"/>
+              <Button x:Name="DepRecheckBtn" Content="Check again" Click="DepRecheck_Click"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- Step 2: calibration -->
+        <Border Style="{StaticResource Card}">
+          <StackPanel>
+            <TextBlock FontWeight="SemiBold" FontSize="15" Text="2. Controllers"/>
+            <TextBlock Style="{StaticResource Dim}" Margin="0,4,0,10"
+                       Text="Calibration measures your pad rather than guessing at it: which byte each button lives in, where the sticks rest, and how far they actually travel. It opens in its own window and asks you to press things one at a time."/>
+            <TextBlock x:Name="SlotStatus" Style="{StaticResource Mono}" Text="Checking..."/>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+              <Button x:Name="CalibrateBtn" Style="{StaticResource Primary}"
+                      Content="Calibrate a controller" Click="Calibrate_Click" Margin="0,0,8,0"/>
+              <Button Content="Refresh" Click="SlotRefresh_Click"/>
+            </StackPanel>
+            <TextBlock Style="{StaticResource Dim}" Margin="0,10,0,0" FontSize="12"
+                       Text="Player 1 is whoever connects first, the way a console does it. A pad with no calibration is left alone and gets no virtual controller, so nothing is ever translated with another pad's numbers."/>
+          </StackPanel>
+        </Border>
+
+        <!-- Step 3: name them -->
+        <Border Style="{StaticResource Card}">
+          <StackPanel>
+            <TextBlock FontWeight="SemiBold" FontSize="15" Text="3. Names (optional)"/>
+            <TextBlock Style="{StaticResource Dim}" Margin="0,4,0,10"
+                       Text="Names appear in notifications and in the tray menu. Leave them blank and Dovetail uses Dovetail Controller 1 and 2."/>
+            <ItemsControl x:Name="NameList">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid Margin="0,3">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="90"/>
+                      <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                               Text="{Binding SlotLabel}" Style="{StaticResource Dim}"/>
+                    <TextBox Grid.Column="1" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button Content="Save names" Click="SaveNames_Click" Margin="0,10,0,0"
+                    HorizontalAlignment="Left"/>
+          </StackPanel>
+        </Border>
+
+      </StackPanel>
+    </ScrollViewer>
+
+    <Grid Grid.Row="2" Margin="0,14,0,0">
+      <TextBlock x:Name="Blocker" Style="{StaticResource Dim}" VerticalAlignment="Center"/>
+      <Button x:Name="FinishBtn" Style="{StaticResource Primary}" Content="Finish setup"
+              HorizontalAlignment="Right" Click="Finish_Click" IsEnabled="False"/>
+    </Grid>
+  </Grid>
+</Window>

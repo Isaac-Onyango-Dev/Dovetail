@@ -1,0 +1,97 @@
+# Build, test, and release Dovetail.
+#
+# One job rather than two, deliberately: the folder that gets attached to a release is the
+# exact folder the tests just passed against, not a rebuild of the same commit.
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+# Needed by 'gh release create' on a tag. Read-only for everything else.
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore src/Dovetail.sln
+
+      - name: Build (Release, x64)
+        run: dotnet build src/Dovetail.sln -c Release --no-restore --nologo
+
+      # Both suites are hardware-free and run against the synthetic fixture pair, because a
+      # clean runner has never had a controller calibrated. Without --profile / --dir, selftest
+      # exits 1 with "no calibrated slot found" and stage5 cannot seed its scratch directory.
+      #
+      # pwsh propagates a non-zero exit code from a native executable, so a failing check fails
+      # the job. The suites return 0 only when nothing failed.
+      - name: Self test (decoding and axis scaling)
+        run: >
+          src/Dovetail.Engine/bin/x64/Release/net8.0-windows/dovetail-engine.exe
+          selftest --profile tests/fixtures/profiles
+
+      - name: Stage 5 test (state machine, uninstall, HidHide ownership)
+        run: >
+          src/Dovetail.Engine/bin/x64/Release/net8.0-windows/dovetail-engine.exe
+          stage5 --dir tests/fixtures/profiles
+
+      # Packaging is a test in its own right: it is the step that proves all three executables
+      # publish and land side by side, which is how they have to be installed.
+      - name: Stage the distribution
+        run: .\build-dist.ps1
+
+      - name: Package
+        id: package
+        shell: pwsh
+        run: |
+          $tag = if ($env:GITHUB_REF -like 'refs/tags/*') { $env:GITHUB_REF_NAME } else { 'ci-' + $env:GITHUB_SHA.Substring(0,7) }
+          $zip = "Dovetail-$tag-win-x64.zip"
+          Compress-Archive -Path dist\Dovetail\* -DestinationPath $zip -Force
+          "zip=$zip"  | Out-File $env:GITHUB_OUTPUT -Append
+          "tag=$tag"  | Out-File $env:GITHUB_OUTPUT -Append
+          Write-Host "packaged $zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.tag }}-win-x64
+          path: ${{ steps.package.outputs.zip }}
+          if-no-files-found: error
+
+      # Tags only. Uses the gh CLI preinstalled on the runner rather than a third-party action,
+      # so nothing outside GitHub itself is trusted with contents: write.
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag   = $env:GITHUB_REF_NAME
+          $zip   = '${{ steps.package.outputs.zip }}'
+          $notes = "docs/release-notes/$tag.md"
+
+          # Hand-written notes when they exist for this tag, generated ones otherwise, so a
+          # future tag still produces a release rather than failing on a missing file.
+          if (Test-Path $notes) {
+            Write-Host "using $notes"
+            gh release create $tag $zip --title "Dovetail $tag" --notes-file $notes
+          } else {
+            Write-Host "no notes file at $notes, generating from commits"
+            gh release create $tag $zip --title "Dovetail $tag" --generate-notes
+          }
