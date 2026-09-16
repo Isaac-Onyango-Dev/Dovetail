@@ -1,7 +1,7 @@
 # Dovetail
 
 [![Download](https://img.shields.io/badge/download-Windows-B8372B?style=flat-square&labelColor=1E2127&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZmlsbD0iI0Q5NDgzQiIgZD0iTTE0LjgsMCBMMTQuOCwxMi4zNiBMOC44LDE2LjM2IEw4LjgsMzIgTDYsMzIgQTYsNiAwIDAgMSAwLDI2IEwwLDYgQTYsNiAwIDAgMSA2LDAgWiBNMTcuMiwwIEwxNy4yLDEzLjY0IEwxMS4yLDE3LjY0IEwxMS4yLDMyIEwyNiwzMiBBNiw2IDAgMCAwIDMyLDI2IEwzMiw2IEE2LDYgMCAwIDAgMjYsMCBaIi8+PC9zdmc+Cg==)](https://isaac-onyango-dev.github.io/Dovetail/)
-[![Latest release](https://img.shields.io/github/v/release/Isaac-Onyango-Dev/Dovetail?style=flat-square&labelColor=1E2127&color=D9483B&label=version)](https://isaac-onyango-dev.github.io/Dovetail/#changelog)
+[![Latest release](https://img.shields.io/github/v/release/Isaac-Onyango-Dev/Dovetail?style=flat-square&labelColor=1E2127&color=D9483B&label=version)](https://isaac-onyango-dev.github.io/Dovetail/#patches)
 [![Downloads](https://img.shields.io/github/downloads/Isaac-Onyango-Dev/Dovetail/total?style=flat-square&labelColor=1E2127&color=D9483B)](https://isaac-onyango-dev.github.io/Dovetail/)
 [![Build](https://img.shields.io/github/actions/workflow/status/Isaac-Onyango-Dev/Dovetail/build.yml?branch=main&style=flat-square&labelColor=1E2127)](https://github.com/Isaac-Onyango-Dev/Dovetail/actions/workflows/build.yml)
 [![MIT licence](https://img.shields.io/badge/licence-MIT-9BA1AC?style=flat-square&labelColor=1E2127)](LICENSE)

@@ -2,493 +2,455 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dovetail — make a USB gamepad work as an Xbox controller</title>
-<meta name="description" content="Dovetail makes a generic USB gamepad work in Windows games that only accept an Xbox controller. Free and open source for Windows 10 and 11.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dovetail — make any USB gamepad work as an Xbox controller</title>
+<meta name="description" content="Your game only accepts Xbox controllers? Dovetail makes a cheap USB gamepad show up as one. Free and open source for Windows 10 and 11.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0A0A0E">
 <link rel="canonical" href="https://isaac-onyango-dev.github.io/Dovetail/">
-<meta name="theme-color" content="#12151A">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-16x16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="site.webmanifest">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Dovetail">
 <meta property="og:title" content="Dovetail — fits your pad to the game">
-<meta property="og:description" content="Make a generic USB gamepad work in Windows games that only accept an Xbox controller.">
+<meta property="og:description" content="Your game only accepts Xbox controllers. Dovetail makes your cheap USB gamepad look like one. Free for Windows 10 and 11.">
 <meta property="og:url" content="https://isaac-onyango-dev.github.io/Dovetail/">
-<meta property="og:image" content="https://isaac-onyango-dev.github.io/Dovetail/img/og.png">
+<meta property="og:image" content="https://isaac-onyango-dev.github.io/Dovetail/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The Dovetail mark and the line: Fits your pad to the game.">
+<meta property="og:image:alt" content="Dovetail: fits your pad to the game. A gamepad on an ember-red glow.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://isaac-onyango-dev.github.io/Dovetail/img/og.png">
-<link rel="icon" href="mark.svg" type="image/svg+xml">
-<link rel="icon" href="img/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta name="twitter:title" content="Dovetail — fits your pad to the game">
+<meta name="twitter:description" content="Make a cheap USB gamepad work in games that only accept Xbox controllers. Free, Windows 10 and 11.">
+<meta name="twitter:image" content="https://isaac-onyango-dev.github.io/Dovetail/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="site.css">
-<style>
-  /* hero */
-  .hero { display: grid; grid-template-columns: minmax(0, 10fr) minmax(0, 11fr); gap: clamp(28px, 4vw, 64px); align-items: center; padding-block: clamp(32px, 6vw, 88px) clamp(56px, 8vw, 104px); }
-  h1 { font-size: clamp(2.7rem, 5.6vw, 4.8rem); line-height: 0.98; font-weight: 700; letter-spacing: -0.04em; }
-  h1 em { font-style: normal; color: var(--accent); }
-  .lede { margin: 1.3rem 0 2rem; font-size: 1.2rem; color: var(--dim); max-width: 36ch; }
-  .download { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
-  .next { margin: 0; font-size: 0.95rem; color: var(--dim); max-width: 44ch; }
-  .facts { margin: 6px 0 0; font-family: var(--mono); font-size: 0.8rem; color: var(--dim); display: flex; flex-wrap: wrap; gap: 4px 18px; }
-  .facts a { color: var(--text); }
-  .facts .count { color: var(--text); }
-  .facts img { display: inline-block; vertical-align: middle; height: 20px; }
-  .winonly { margin: 0; font-size: 0.92rem; color: var(--warn); }
-
-  /* the product art is drawn for a light sheet, so it sits on one */
-  .plate {
-    position: relative; border-radius: 16px; padding: clamp(12px, 2vw, 24px) clamp(12px, 2vw, 24px) 36px;
-    background: var(--plate) linear-gradient(rgb(0 0 0 / 0.045) 1px, transparent 1px) 0 0 / 100% 28px;
-    box-shadow: 0 30px 80px -30px rgb(0 0 0 / 0.8);
-  }
-  .plate svg { width: 100%; height: auto; mix-blend-mode: multiply; overflow: visible; }
-  .plate .tag { position: absolute; left: 16px; bottom: 10px; font-family: var(--mono); font-size: 0.72rem; color: #5B616B; letter-spacing: 0.06em; }
-  .replay { position: absolute; right: 12px; bottom: 6px; background: none; border: 0; padding: 6px 4px; font: 0.82rem var(--mono); color: #50565F; text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
-  .replay:hover { color: #1E2127; }
-  .part { animation: collapse 1.15s cubic-bezier(0.455, 0.03, 0.515, 0.955) both; }
-  .part.tl { --dx: 147px; --dy: -903px; animation-delay: 0.8s; }
-  .part.tr { --dx: -150px; --dy: -903px; animation-delay: 0.8s; }
-  .part.sb { --dx: -2px; --dy: -763px; animation: collapse 1.15s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0.9s both, vanish 0.29s linear 1.76s both; }
-  .part.bd { --dx: 12px; --dy: -347px; animation: collapse 1.15s cubic-bezier(0.455, 0.03, 0.515, 0.955) 1.02s both, vanish 0.29s linear 1.88s both; }
-  .sheet { animation: vanish 0.55s linear 2.17s both; }
-  .assembled { transform-box: fill-box; transform-origin: center; animation: arrive 0.55s cubic-bezier(0.215, 0.61, 0.355, 1) 2.17s both; }
-  @keyframes collapse { to { transform: translate(var(--dx), var(--dy)); } }
-  @keyframes vanish { from { opacity: 1; } to { opacity: 0; } }
-  @keyframes arrive { from { opacity: 0; transform: scale(0.94) rotate(-3deg); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) {
-    .part, .sheet, .assembled { animation: none; }
-    .sheet { opacity: 0; }
-    .replay { display: none; }
-  }
-
-  /* why */
-  .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 18px; margin-top: 2.5rem; align-items: stretch; }
-  .node { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
-  .node.mid { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
-  .node .k { font-family: var(--mono); font-size: 0.75rem; color: var(--dim); display: block; margin-bottom: 10px; }
-  .node.mid .k { color: var(--accent); }
-  .node p { margin: 0; font-size: 0.96rem; color: var(--dim); }
-  .wire { align-self: center; width: 44px; height: 12px; background: repeating-linear-gradient(90deg, var(--accent) 0 3px, transparent 3px 8px) center / 100% 2px no-repeat; }
-  .aside { margin-top: 1.75rem; padding-left: 16px; border-left: 2px solid var(--line); color: var(--dim); }
-
-  /* install */
-  .steps { list-style: none; margin: 2.5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: step; }
-  .steps li { counter-increment: step; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
-  .steps li::before { content: "0" counter(step); display: block; margin-bottom: 14px; font: 500 0.85rem var(--mono); color: var(--accent); }
-  .steps p { font-size: 0.95rem; margin: 0; color: var(--dim); }
-  .steps strong { color: var(--text); font-weight: 600; }
-  .install-cta { margin-top: 2.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
-  .install-cta p { margin: 0; font-size: 0.93rem; color: var(--dim); }
-  details.verify { margin-top: 1.5rem; }
-  details.verify summary { cursor: pointer; color: var(--dim); width: fit-content; font-size: 0.93rem; }
-  details.verify p { margin: 0.75rem 0 0; font-size: 0.93rem; color: var(--dim); }
-
-  /* features */
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 2.5rem; }
-  .feat { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
-  .feat svg { width: 28px; height: 28px; color: var(--accent); margin-bottom: 16px; }
-  .feat p { margin: 0; font-size: 0.95rem; color: var(--dim); }
-
-  /* requirements */
-  .reqs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 2.5rem; }
-  .req { border-top: 2px solid var(--line); padding-top: 16px; }
-  .req.must { border-top-color: var(--accent); }
-  .req .k { font: 500 0.75rem var(--mono); color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
-  .req.must .k { color: var(--accent); }
-  .req h3 { margin: 6px 0; }
-  .req p { margin: 0; font-size: 0.95rem; color: var(--dim); }
-
-  /* changelog: notes are rendered in full, never clamped */
-  .rels { margin-top: 2rem; display: grid; gap: 12px; }
-  .rel { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; }
-  .rel summary { cursor: pointer; padding: 16px 20px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; list-style-position: outside; }
-  .rel summary::marker { color: var(--dim); }
-  .rel .v { font: 600 1.15rem var(--head); }
-  .rel .d { font: 0.8rem var(--mono); color: var(--dim); }
-  .rel .latest { font: 500 0.7rem var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); border: 1px solid var(--accent); border-radius: 99px; padding: 1px 8px; }
-  .notes { padding: 4px 20px 20px; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
-  .notes > :first-child { margin-top: 16px; }
-  .notes h1, .notes h2, .notes h3 { font-size: 1.1rem; margin: 1.6rem 0 0.5rem; }
-  .notes p, .notes li { color: var(--dim); max-width: 72ch; }
-  .notes strong { color: var(--text); }
-  .notes ul, .notes ol { padding-left: 1.3rem; margin: 0 0 1rem; }
-  .notes li { margin-bottom: 0.35rem; }
-  .notes hr { border: 0; border-top: 1px solid var(--line); margin: 1.5rem 0; }
-  .notes table { border-collapse: collapse; display: block; overflow-x: auto; margin: 0 0 1rem; }
-  .notes th, .notes td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; font-size: 0.93rem; }
-  .notes .anchor, .notes .octicon { display: none; }
-  .notes br { display: none; }   /* GitHub keeps the notes' hard wraps; let the text reflow */
-  .fallback { color: var(--dim); }
-
-  /* FAQ */
-  .faq { margin-top: 2rem; border-top: 1px solid var(--line); }
-  .faq details { border-bottom: 1px solid var(--line); }
-  .faq summary { cursor: pointer; padding: 18px 36px 18px 0; font: 600 1.08rem var(--head); list-style: none; position: relative; }
-  .faq summary::-webkit-details-marker { display: none; }
-  .faq summary::after { content: "+"; position: absolute; right: 4px; top: 14px; font: 400 1.4rem var(--mono); color: var(--accent); }
-  .faq details[open] summary::after { content: "−"; }
-  .faq details > div { padding: 0 0 18px; color: var(--dim); }
-  .faq details > div p:last-child { margin-bottom: 0; }
-  .status { font-family: var(--mono); font-size: 0.82rem; white-space: nowrap; }
-  .status::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
-  .status.ok { color: var(--good); } .status.ok::before { background: var(--good); }
-  .status.pending { color: var(--warn); } .status.pending::before { border: 1.5px solid var(--warn); width: 5px; height: 5px; }
-  .games { border-collapse: collapse; margin: 0.25rem 0 1rem; width: 100%; max-width: 640px; }
-  .games th, .games td { text-align: left; padding: 10px 12px 10px 0; border-top: 1px solid var(--line); vertical-align: top; font-size: 0.95rem; }
-  .games th { color: var(--text); font-weight: 500; }
-
-  @media (max-width: 960px) {
-    .hero { grid-template-columns: 1fr; }
-    .steps { grid-template-columns: 1fr 1fr; }
-    .grid, .reqs { grid-template-columns: 1fr 1fr; }
-  }
-  @media (max-width: 680px) {
-    .flow { grid-template-columns: 1fr; }
-    .wire { width: 12px; height: 28px; justify-self: center; background: repeating-linear-gradient(180deg, var(--accent) 0 3px, transparent 3px 8px) center / 2px 100% no-repeat; }
-    .steps, .grid, .reqs { grid-template-columns: 1fr; }
-    .download, .download .btn { width: 100%; }
-  }
-</style>
+<script>document.documentElement.classList.add('js')</script>
+<script src="site.js" defer></script>
 </head>
-<body>
+<body id="top">
 
-<header class="bar" id="bar">
-  <div class="wrap">
-    <a class="brand" href="./"><img src="mark.svg" alt="" width="24" height="24">Dovetail</a>
-    <nav aria-label="Sections">
-      <a class="opt" href="#features">Features</a>
-      <a class="opt" href="#changelog">What's new</a>
-      <a href="#faq">FAQ</a>
-      <a href="https://github.com/Isaac-Onyango-Dev/Dovetail">GitHub</a>
-    </nav>
-    <a class="btn btn-sm" data-setup href="{{SETUP_URL}}" tabindex="-1">
-      <svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M9 2h2v9.17l3.09-3.08 1.41 1.41L10 15 4.5 9.5l1.41-1.41L9 11.17V2zM3 16h14v2H3z"/></svg>
-      Download
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mark" viewBox="0 0 32 32"><path fill="currentColor" d="M14.8,0 L14.8,12.36 L8.8,16.36 L8.8,32 L6,32 A6,6 0 0 1 0,26 L0,6 A6,6 0 0 1 6,0 Z M17.2,0 L17.2,13.64 L11.2,17.64 L11.2,32 L26,32 A6,6 0 0 0 32,26 L32,6 A6,6 0 0 0 26,0 Z"/></symbol>
+  <symbol id="i-pad" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M7 6h10a5 5 0 0 1 5 5.3l-.4 5.2a2.8 2.8 0 0 1-5 1.5L15 16H9l-1.6 2a2.8 2.8 0 0 1-5-1.5L2 11.3A5 5 0 0 1 7 6Z"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M7 10v3M5.5 11.5h3"/><circle cx="16" cy="10.5" r="1" fill="currentColor"/><circle cx="18" cy="12.5" r="1" fill="currentColor"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="m8.5 8.5 7 7m0-7-7 7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path fill="currentColor" d="M7 3h10v2h3v2.5A4.5 4.5 0 0 1 16.2 12 5 5 0 0 1 13 14.8V17h3v2H8v-2h3v-2.2A5 5 0 0 1 7.8 12 4.5 4.5 0 0 1 4 7.5V5h3V3Zm0 4H6v.5a2.5 2.5 0 0 0 1.2 2.1A5 5 0 0 1 7 8.5V7Zm10 0v1.5c0 .4 0 .8-.2 1.1A2.5 2.5 0 0 0 18 7.5V7h-1ZM6 20h12v2H6z"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M15 5 8 12l7 7"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/></symbol>
+</svg>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="embers" aria-hidden="true">
+  <span class="blob blob--ember" data-drift="0.22"></span>
+  <span class="blob blob--wine" data-drift="0.14"></span>
+  <span class="blob blob--flare" data-drift="0.30"></span>
+  <span class="blob blob--gold" data-drift="0.10"></span>
+  <span class="blob blob--deep" data-drift="0.18"></span>
+</div>
+<div class="grain" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<!-- ============ NAV ============ -->
+<header class="topbar" id="topbar">
+  <nav class="nav" aria-label="Main">
+    <a class="wordmark" href="#top">
+      <img src="favicon.svg" width="30" height="30" alt="">
+      <span class="wm" aria-hidden="true"><span class="wm-kicker">Pad → Xbox</span><span class="wm-name">Dovetail</span></span>
+      <span class="sr-only">Dovetail home</span>
     </a>
-  </div>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#loadout">Features</a>
+      <a href="#screens">Screens</a>
+      <a href="#patches">Patch notes</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-tail">
+      <a class="nav-cta" href="#ready">Get it free</a>
+      <button class="nav-burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="sheet"><span></span><span></span></button>
+    </div>
+  </nav>
 </header>
 
-<main>
-  <div class="traces">
-    <div class="wrap hero">
-      <div>
-        <h1>Fits your pad<br>to the <em>game.</em></h1>
-        <p class="lede">Your game only recognises Xbox controllers. Dovetail makes your cheap USB gamepad look like one.</p>
-        <div class="download">
-          <a class="btn" data-setup href="{{SETUP_URL}}">
-            <svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M9 2h2v9.17l3.09-3.08 1.41 1.41L10 15 4.5 9.5l1.41-1.41L9 11.17V2zM3 16h14v2H3z"/></svg>
-            Download for Windows
-          </a>
-          <p class="winonly" id="winonly" hidden>Dovetail is Windows only. Download it on the PC you play on.</p>
-          <p class="next">Runs the installer, sets up two small required drivers, then walks you through calibrating your pad.</p>
-          <p class="facts">
-            <span data-version>v{{VERSION}}</span>
-            <span>Free · Windows 10/11 x64</span>
-            <span id="count" hidden></span>
-            <a data-zip href="{{ZIP_URL}}">Portable .zip</a>
-          </p>
+<div class="sheet" id="sheet" hidden>
+  <a href="#how">How it works</a>
+  <a href="#loadout">Features</a>
+  <a href="#screens">Screens</a>
+  <a href="#patches">Patch notes</a>
+  <a href="#faq">FAQ</a>
+  <a class="btn-a sheet-cta" data-setup href="{{SETUP_URL}}"><span class="glyph">A</span>Download</a>
+</div>
+
+<main id="main">
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <a class="pill" href="#patches" id="pill">
+        <span class="pip" aria-hidden="true"></span>
+        <span class="pill-tag" data-version-tag>v{{VERSION}}</span>
+        <span class="pill-text" id="pill-text">Latest release — see what's new</span>
+      </a>
+
+      <h1 class="hero-h1">
+        <span class="line">Fits your</span>
+        <span class="line">pad to the</span>
+        <span class="line"><span class="hot">game.</span></span>
+      </h1>
+
+      <p class="hero-sub">Your game only recognises Xbox controllers. <strong>Dovetail makes your cheap USB gamepad look like one</strong> — install it, press a few buttons to calibrate, and play.</p>
+
+      <div class="cta-row">
+        <a class="btn-a" data-setup href="{{SETUP_URL}}">
+          <span class="glyph" aria-hidden="true">A</span>
+          <span>Download for Windows<small>Free · the installer, one click</small></span>
+        </a>
+        <div class="score" id="score" data-state="loading" aria-live="polite">
+          <span class="score-label">Downloads</span>
+          <strong class="score-num" id="score-num"><span class="pad">-----</span></strong>
+          <a class="score-badge" href="https://github.com/Isaac-Onyango-Dev/Dovetail/releases"><img id="score-badge" alt="" width="120" height="20"></a>
         </div>
       </div>
 
-      <div class="plate">
-        <svg id="pad" viewBox="0 0 1833 1400" role="img" aria-label="A gamepad assembling from its parts">
-          <g class="sheet">
-            <image class="part sb" href="img/part08.png" x="241" y="1115" width="1385" height="225"/>
-            <image class="part tl" href="img/part06.png" x="93" y="975" width="211" height="300"/>
-            <image class="part tl" href="img/part04.png" x="323" y="940" width="137" height="141"/>
-            <image class="part tr" href="img/part07.png" x="1562" y="976" width="211" height="299"/>
-            <image class="part tr" href="img/part05.png" x="1406" y="940" width="137" height="141"/>
-            <image class="part bd" href="img/part02.png" x="309" y="456" width="1347" height="570"/>
-            <image class="part bd" href="img/part03.png" x="183" y="670" width="253" height="242"/>
-            <image href="img/part01.png" x="60" y="60" width="1743" height="636"/>
-          </g>
-          <image class="assembled" href="img/pad-hero.jpg" x="136.5" y="77" width="1560" height="1246"/>
-        </svg>
-        <span class="tag">GENERIC USB PAD → XBOX 360</span>
-        <button class="replay" type="button" id="replay">Play again</button>
+      <p class="cta-foot">
+        <span>Windows 10 / 11 · 64-bit</span><span class="sep" aria-hidden="true"></span>
+        <span data-version>v{{VERSION}}</span><span class="sep" aria-hidden="true"></span>
+        <a data-zip href="{{ZIP_URL}}">Portable .zip</a>
+      </p>
+      <p class="winonly" id="winonly" hidden>Heads up: Dovetail runs on Windows only. Grab it on the PC you play on.</p>
+    </div>
+
+    <div class="stage" aria-hidden="true">
+      <div class="stage-glow"></div>
+      <svg class="orbit" viewBox="0 0 400 400"><circle cx="200" cy="200" r="190"/><circle class="dash" cx="200" cy="200" r="160"/><circle class="dot" cx="200" cy="10" r="4"/><circle class="dot" cx="40" cy="200" r="2.5"/></svg>
+      <img class="pad" src="img/pad.png" width="1100" height="921" alt="">
+      <div class="lock"><i></i><i></i><i></i><i></i></div>
+      <div class="readout">
+        <span>In · DirectInput pad</span>
+        <span class="out">Out · Xbox 360 <b>●</b></span>
+      </div>
+      <div class="sticker"><span>2P<br>ready</span></div>
+      <div class="achv">
+        <span class="achv-ico"><svg><use href="#i-trophy"/></svg></span>
+        <p><strong>Achievement unlocked</strong>Game found an <b>Xbox 360 controller</b></p>
       </div>
     </div>
   </div>
+</section>
 
-  <section id="why">
-    <div class="wrap">
-      <div class="label">Why it exists</div>
-      <h2>Your game says no controller is connected.</h2>
-      <p class="dim">Most budget gamepads speak an older language than the one modern games listen for. The game looks for an Xbox controller, doesn't find one, and ignores the pad entirely. Dovetail sits in between and translates.</p>
-      <div class="flow">
-        <div class="node"><span class="k">IN · DirectInput / HID</span><h3>Your gamepad</h3><p>Any USB pad Windows recognises as a game controller.</p></div>
-        <div class="wire" aria-hidden="true"></div>
-        <div class="node mid"><span class="k">DOVETAIL</span><h3>Translation</h3><p>Reads the pad's raw HID reports and maps them using the calibration you recorded.</p></div>
-        <div class="wire" aria-hidden="true"></div>
-        <div class="node"><span class="k">OUT · XInput via ViGEmBus</span><h3>Xbox 360 controller</h3><p>A virtual controller the game detects as the real thing. No wrapper, no launch options, no per-game DLL.</p></div>
-      </div>
-      <p class="aside">Dovetail also hides the original pad from games with HidHide, so a game can't grab the raw pad instead of the virtual one.</p>
+<!-- ============ TICKER ============ -->
+<section class="ticker-wrap" aria-label="What Dovetail does">
+  <div class="ticker">
+    <div class="ticker-run">
+      <span>DirectInput → XInput</span><span>Guided calibration</span><span>Two players</span><span>Per-game profiles</span><span>Stick-feel presets</span><span>Drivers installed for you</span><span>Lives in the tray</span><span>Clean uninstall</span><span>Updates itself</span><span>Free &amp; open source</span>
     </div>
-  </section>
+    <div class="ticker-run" aria-hidden="true">
+      <span>DirectInput → XInput</span><span>Guided calibration</span><span>Two players</span><span>Per-game profiles</span><span>Stick-feel presets</span><span>Drivers installed for you</span><span>Lives in the tray</span><span>Clean uninstall</span><span>Updates itself</span><span>Free &amp; open source</span>
+    </div>
+  </div>
+</section>
 
-  <section id="install">
-    <div class="wrap">
-      <div class="label">Install</div>
-      <h2>A few minutes, start to finish.</h2>
-      <p class="dim">Everything Dovetail needs is either in the installer or fetched for you on first run. The .NET runtime is bundled.</p>
-      <ol class="steps">
-        <li><h3>Run the installer</h3><p>Windows may say <strong>Windows protected your PC</strong> because the installer isn't code-signed yet. Select <strong>More info</strong>, then <strong>Run anyway</strong>.</p></li>
-        <li><h3>Let it add two drivers</h3><p>On first run Dovetail downloads ViGEmBus and HidHide from their developer's own releases. Windows asks for permission once.</p></li>
-        <li><h3>Calibrate your pad</h3><p>A short wizard asks you to press each button and move each stick, so the controls match your hardware.</p></li>
-        <li><h3>Start your game</h3><p>It sees an Xbox 360 controller. Two pads show up as player 1 and player 2.</p></li>
-      </ol>
-      <div class="install-cta">
-        <a class="btn" data-setup href="{{SETUP_URL}}">
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path fill="currentColor" d="M9 2h2v9.17l3.09-3.08 1.41 1.41L10 15 4.5 9.5l1.41-1.41L9 11.17V2zM3 16h14v2H3z"/></svg>
-          Download for Windows
-        </a>
-        <p>Rather not install? <a data-zip href="{{ZIP_URL}}">Get the portable .zip</a> and keep its three .exe files together.</p>
-      </div>
-      <details class="verify" id="verify" hidden>
-        <summary>Check the download</summary>
-        <p>In PowerShell, in your Downloads folder, run <code id="hashcmd"></code>. The result should match:</p>
-        <p><code id="hash"></code></p>
-      </details>
-    </div>
-  </section>
+<!-- ============ VERSUS ============ -->
+<section class="versus" id="how">
+  <header class="sec-head sec-head--center">
+    <p class="eyebrow">The problem <b>/ 01</b></p>
+    <h2>Same pad. <em>Different game.</em></h2>
+    <p class="sec-sub">Budget gamepads speak an older language, DirectInput. Most modern games only listen for Xbox controllers, XInput. So they ignore your pad completely.</p>
+  </header>
 
-  <section id="features">
-    <div class="wrap">
-      <div class="label">What it does</div>
-      <h2>Small tool. Does the whole job.</h2>
-      <div class="grid">
-        <div class="feat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4"/></svg>
-          <h3>Guided calibration</h3>
-          <p>A wizard measures rest noise, stick range and triggers, then saves a profile for each player.</p>
-        </div>
-        <div class="feat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 8 12 13l9.5-5z"/><path d="m2.5 12 9.5 5 9.5-5M2.5 16l9.5 5 9.5-5"/></svg>
-          <h3>Per-game profiles</h3>
-          <p>Deadzone, saturation and response curve per game, layered over your calibration without changing it.</p>
-        </div>
-        <div class="feat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>
-          <h3>Stick-feel presets</h3>
-          <p>Standard, Precise, Responsive and Full range, or tune by hand. A running game picks up changes within a second.</p>
-        </div>
-        <div class="feat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="14" width="19" height="6.5" rx="1.5"/><path d="M15 17.25h1.5M18.5 17.25H19"/><path d="M7 11V5.5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2V11"/><path d="M10 7.5h4"/></svg>
-          <h3>Lives in the tray</h3>
-          <p>Live status for each controller, naming, re-calibrate, and notifications from the notification area.</p>
-        </div>
-        <div class="feat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5 4 5.5v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10v-6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
-          <h3>Drivers handled for you</h3>
-          <p>Detects, downloads, verifies and installs ViGEmBus and HidHide, and can repair them later.</p>
-        </div>
-        <div class="feat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 3.5v5h5"/><path d="M12 8v4l2.5 2.5"/></svg>
-          <h3>Reversible uninstall</h3>
-          <p>Removes only what Dovetail added, writes a restore point first, and keeps your calibration.</p>
-        </div>
-      </div>
+  <div class="vs-grid">
+    <div class="screen screen--bad reveal">
+      <span class="screen-tag">Without Dovetail</span>
+      <p class="screen-msg">No controller<br>detected</p>
+      <p class="screen-note">Your pad is plugged in and Windows sees it. <strong>The game doesn't</strong>, because it only looks for Xbox controllers.</p>
     </div>
-  </section>
+    <div class="vs-mid" aria-hidden="true"><b>VS</b><span>same pad</span></div>
+    <div class="screen screen--good reveal" data-delay="120">
+      <span class="screen-tag">With Dovetail</span>
+      <p class="screen-msg">Press <span class="glyph">A</span> to start<span class="blink">Controller connected</span></p>
+      <p class="screen-note">Dovetail translates your pad on the fly. <strong>The game sees an Xbox 360 controller</strong> and just works. No per-game setup.</p>
+    </div>
+  </div>
 
-  <section id="requirements">
-    <div class="wrap">
-      <div class="label">Requirements</div>
-      <h2>What your PC needs.</h2>
-      <p class="dim">Only the first one is on you. Dovetail installs the other two on first run. It runs as a normal user and asks for admin rights only while setting up drivers.</p>
-      <div class="reqs">
-        <div class="req must"><span class="k">You provide</span><h3>Windows 10 or 11, 64-bit</h3><p>Nothing else. No macOS, Linux or ARM build.</p></div>
-        <div class="req"><span class="k">Installed for you</span><h3>ViGEmBus</h3><p>The driver that creates the virtual Xbox controller. Without it there is nothing for the game to see.</p></div>
-        <div class="req"><span class="k">Installed for you · not optional</span><h3>HidHide</h3><p>Hides the real pad from games. Without it, a game that checks both can grab the raw pad and ignore Dovetail. We found that out on the first real game we tested.</p></div>
-      </div>
+  <div class="pipe reveal">
+    <div class="pipe-node">
+      <div class="ico"><svg><use href="#i-pad"/></svg></div>
+      <h3>Your gamepad</h3>
+      <p>Any USB pad Windows recognises as a game controller.</p>
+      <small>Raw HID reports</small>
     </div>
-  </section>
+    <div class="pipe-node pipe-node--mid">
+      <div class="ico"><svg viewBox="0 0 32 32" width="34" height="34"><use href="#mark"/></svg></div>
+      <h3>Dovetail</h3>
+      <p>Reads every button and stick using the calibration you recorded, and hides the original pad.</p>
+      <small>Calibration + HidHide</small>
+    </div>
+    <div class="pipe-node">
+      <div class="ico"><svg><use href="#i-pad"/></svg></div>
+      <h3>Xbox 360 controller</h3>
+      <p>A virtual controller that games detect as the real thing.</p>
+      <small>XInput via ViGEmBus</small>
+    </div>
+  </div>
+</section>
 
-  <section id="changelog">
-    <div class="wrap">
-      <div class="label">What's new</div>
-      <h2>Release notes.</h2>
-      <p class="dim">Straight from the <a href="https://github.com/Isaac-Onyango-Dev/Dovetail/releases">GitHub releases</a>.</p>
-      <div class="rels" id="rels">
-        <p class="fallback">Loading release notes… If nothing shows up, read them <a href="https://github.com/Isaac-Onyango-Dev/Dovetail/releases">on GitHub</a>.</p>
-      </div>
-    </div>
-  </section>
+<!-- ============ LEVELS ============ -->
+<section class="levels">
+  <header class="sec-head">
+    <p class="eyebrow">Getting started <b>/ 02</b></p>
+    <h2>Three levels. <em>No boss fight.</em></h2>
+  </header>
+  <ol class="level-row">
+    <li class="level panel reveal">
+      <div class="level-top"><span class="level-num">Level 1</span><span class="level-big" aria-hidden="true">01</span></div>
+      <h3>Install</h3>
+      <p>Run the installer. On first launch Dovetail sets up its <strong>two small drivers</strong> for you — Windows asks permission once.</p>
+      <div class="xp"><i></i></div>
+    </li>
+    <li class="level panel reveal" data-delay="100">
+      <div class="level-top"><span class="level-num">Level 2</span><span class="level-big" aria-hidden="true">02</span></div>
+      <h3>Calibrate</h3>
+      <p>A short wizard asks you to <strong>press each button and move each stick</strong>, so the controls match your exact pad.</p>
+      <div class="xp"><i></i></div>
+    </li>
+    <li class="level panel reveal" data-delay="200">
+      <div class="level-top"><span class="level-num">Level 3</span><span class="level-big" aria-hidden="true">03</span></div>
+      <h3>Play</h3>
+      <p>Start your game. It sees an Xbox 360 controller. <strong>Two pads? Player 1 and Player 2.</strong></p>
+      <div class="xp"><i></i></div>
+    </li>
+  </ol>
+  <p class="tip reveal"><b>Tip</b><span>Windows may show <strong>"Windows protected your PC"</strong> the first time, because the installer isn't code-signed yet. Click <strong>More info</strong>, then <strong>Run anyway</strong>. The whole source is on GitHub if you'd like to check it first.</span></p>
+</section>
 
-  <section id="faq">
-    <div class="wrap">
-      <div class="label">FAQ</div>
-      <h2>Straight answers.</h2>
-      <div class="faq">
-        <details>
-          <summary>Will it work with my controller?</summary>
-          <div>
-            <p>Probably, but it hasn't been checked. The one receiver tested end to end is the Shanwan "Twin USB Joystick" (VID 0810, PID 0001), with two pads acting as two separate players.</p>
-            <p>Calibration measures whatever your pad actually sends, so any USB gamepad with a standard HID descriptor should work once it's calibrated. Tried another pad? <a href="https://github.com/Isaac-Onyango-Dev/Dovetail/issues">Tell us whether it worked</a>.</p>
-          </div>
-        </details>
-        <details>
-          <summary>Which games have been tested?</summary>
-          <div>
-            <table class="games">
-              <tr><th scope="row">Sekiro: Shadows Die Twice</th><td><span class="status ok">Works</span><br>Detection, controls and two players confirmed in game.</td></tr>
-              <tr><th scope="row">Call of Duty: Black Ops III</th><td><span class="status pending">Not tested yet</span><br>It wasn't installed on the test machine. That doesn't mean it fails.</td></tr>
-            </table>
-            <p>Any game that supports an Xbox 360 controller should see Dovetail's virtual one, but only Sekiro has been confirmed.</p>
-          </div>
-        </details>
-        <details>
-          <summary>Why does Windows warn me about the installer?</summary>
-          <div><p>The installer isn't code-signed yet, so SmartScreen doesn't recognise it. Select <strong>More info</strong>, then <strong>Run anyway</strong>. Dovetail is open source, and each release lists a SHA-256 checksum you can check the download against.</p></div>
-        </details>
-        <details>
-          <summary>Why does it need HidHide? Can I skip it?</summary>
-          <div><p>No. Without HidHide the real pad stays visible to games alongside the virtual Xbox controller. Many games check both, pick up the real pad, and ignore Dovetail even while it's translating perfectly.</p></div>
-        </details>
-        <details>
-          <summary>Can I undo everything?</summary>
-          <div>
-            <p>Yes. Uninstall from Add/Remove Programs or the Start Menu. It removes Dovetail's auto-start entry and its own HidHide settings, un-hides any device Dovetail hid, and writes a restore point first.</p>
-            <p>It keeps your calibration in <code>%LOCALAPPDATA%\Dovetail</code> in case you come back, and leaves ViGEmBus and HidHide installed, since other programs may use them.</p>
-          </div>
-        </details>
-        <details>
-          <summary>Does it update itself?</summary>
-          <div><p>From v1.2.0 on, yes, when you ask it to: open Settings → <strong>Updates</strong> → <strong>Check for updates</strong>. It doesn't check in the background. Copies run from the portable .zip point you back to this page instead.</p></div>
-        </details>
-        <details>
-          <summary>Can I use it without installing?</summary>
-          <div><p>Yes. Each release also includes a portable .zip. Keep <code>Dovetail.exe</code>, <code>dovetail-diag.exe</code> and <code>dovetail-engine.exe</code> in the same folder, because they rely on each other.</p></div>
-        </details>
-        <details>
-          <summary>Does rumble work?</summary>
-          <div><p>Not yet. Rumble isn't sent to the pad.</p></div>
-        </details>
-        <details>
-          <summary>Something went wrong.</summary>
-          <div><p><a href="https://github.com/Isaac-Onyango-Dev/Dovetail/issues">Open an issue on GitHub</a> with your pad's name, your Windows version and what you saw. <code>dovetail-engine deps paths</code> shows which folders Dovetail is using, which helps.</p></div>
-        </details>
-      </div>
+<!-- ============ LOADOUT ============ -->
+<section class="loadout" id="loadout">
+  <header class="sec-head">
+    <p class="eyebrow">Loadout <b>/ 03</b></p>
+    <h2>Everything in <em>the box.</em></h2>
+    <p class="sec-sub">No config files, no command line, no hunting for drivers.</p>
+  </header>
+  <div class="bento">
+    <article class="cell panel reveal">
+      <div class="cell-top"><span class="cell-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4"/></svg></span><span class="cell-slot">Slot 1</span></div>
+      <h3>Guided calibration</h3>
+      <p>Dovetail measures your pad instead of guessing: where the sticks rest, how far they travel, which button is which. It saves a profile for each player.</p>
+      <div class="chips"><span>Sticks</span><span>Triggers</span><span>All buttons</span><span>Per player</span></div>
+    </article>
+    <article class="cell panel reveal" data-delay="70" data-tint="gold">
+      <div class="cell-top"><span class="cell-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="8" cy="9" r="3.2"/><circle cx="16.5" cy="9" r="3.2"/><path d="M2.5 20c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5M11 20c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5"/></svg></span><span class="cell-slot">Slot 2</span></div>
+      <h3>Two players</h3>
+      <p>Two pads become two separate Xbox controllers. Couch co-op, sorted.</p>
+    </article>
+    <article class="cell panel reveal" data-delay="140" data-tint="flare">
+      <div class="cell-top"><span class="cell-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></span><span class="cell-slot">Slot 3</span></div>
+      <h3>Stick feel</h3>
+      <p>Standard, Precise, Responsive or Full range. A running game picks up changes within a second.</p>
+    </article>
+    <article class="cell panel reveal" data-tint="wine">
+      <div class="cell-top"><span class="cell-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3 2.5 8 12 13l9.5-5z"/><path d="m2.5 12 9.5 5 9.5-5M2.5 16l9.5 5 9.5-5"/></svg></span><span class="cell-slot">Slot 4</span></div>
+      <h3>Per-game profiles</h3>
+      <p>Different deadzone or response curve for each game. Dovetail switches when the game starts.</p>
+    </article>
+    <article class="cell panel reveal" data-delay="70" data-tint="gold">
+      <div class="cell-top"><span class="cell-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 4 5.5v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10v-6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span><span class="cell-slot">Slot 5</span></div>
+      <h3>Drivers handled</h3>
+      <p>Downloads, verifies and installs ViGEmBus and HidHide for you, and repairs them if they break.</p>
+    </article>
+    <article class="cell panel reveal" data-delay="140" data-tint="flare">
+      <div class="cell-top"><span class="cell-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="14" width="19" height="6.5" rx="1.5"/><path d="M15 17.25h1.5M18.5 17.25H19"/><path d="M7 11V5.5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2V11"/><path d="M10 7.5h4"/></svg></span><span class="cell-slot">Slot 6</span></div>
+      <h3>Stays out of the way</h3>
+      <p>Lives in the tray with live controller status and notifications. Updates itself when you ask. Uninstalls cleanly, writes a restore point first, and keeps your calibration in case you come back.</p>
+      <div class="chips"><span>Tray app</span><span>In-app updates</span><span>Reversible uninstall</span></div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ SCREENS ============ -->
+<section class="screens" id="screens">
+  <header class="sec-head">
+    <p class="eyebrow">The real thing <b>/ 04</b></p>
+    <h2>Screenshots, <em>not renders.</em></h2>
+    <p class="sec-sub">Captured from a fresh install on a clean Windows machine.</p>
+  </header>
+  <div class="shot-frame">
+    <button class="shot-nav shot-nav--prev" id="shot-prev" type="button" aria-label="Previous screenshot" aria-controls="shot-strip"><svg><use href="#i-left"/></svg></button>
+    <div class="shot-strip" id="shot-strip" tabindex="0" role="region" aria-label="Screenshots of Dovetail">
+      <figure class="shot"><img src="shots/intro.png" width="950" height="750" loading="lazy" decoding="async" alt="Dovetail's opening screen: the gamepad render under the Dovetail wordmark"><figcaption><b>01</b> The first launch</figcaption></figure>
+      <figure class="shot"><img src="shots/first-run.png" width="934" height="695" loading="lazy" decoding="async" alt="First-time setup showing both drivers OK and a button to calibrate a controller"><figcaption><b>02</b> Drivers set up, ready to calibrate</figcaption></figure>
+      <figure class="shot"><img src="shots/games.png" width="1109" height="695" loading="lazy" decoding="async" alt="The Games tab with an Add a game button for per-game stick settings"><figcaption><b>03</b> Per-game settings</figcaption></figure>
+      <figure class="shot"><img src="shots/notifications.png" width="1109" height="695" loading="lazy" decoding="async" alt="The Notifications tab with connect, disconnect and auto-start options"><figcaption><b>04</b> Notifications and auto-start</figcaption></figure>
+      <figure class="shot"><img src="shots/drivers.png" width="1109" height="695" loading="lazy" decoding="async" alt="The Dependencies tab showing ViGEmBus and HidHide both OK"><figcaption><b>05</b> Driver health at a glance</figcaption></figure>
+      <figure class="shot"><img src="shots/updates.png" width="1109" height="695" loading="lazy" decoding="async" alt="The Updates tab showing the installed version and a Check for updates button"><figcaption><b>06</b> One-click updates</figcaption></figure>
     </div>
-  </section>
+    <button class="shot-nav shot-nav--next" id="shot-next" type="button" aria-label="Next screenshot" aria-controls="shot-strip"><svg><use href="#i-right"/></svg></button>
+  </div>
+</section>
+
+<!-- ============ SPECS ============ -->
+<section class="specs" id="specs">
+  <header class="sec-head">
+    <p class="eyebrow">System requirements <b>/ 05</b></p>
+    <h2>Will it run <em>on my PC?</em></h2>
+  </header>
+  <div class="spec-grid">
+    <div class="spec panel reveal">
+      <h3>Minimum</h3>
+      <dl>
+        <dt>OS</dt><dd><strong>Windows 10 or 11, 64-bit.</strong> No macOS, Linux or ARM build.</dd>
+        <dt>Controller</dt><dd>A USB gamepad Windows recognises as a game controller, calibrated once in Dovetail.</dd>
+        <dt>ViGEmBus</dt><dd>Creates the virtual Xbox controller. <span class="req req--auto">Installed for you</span></dd>
+        <dt>HidHide</dt><dd>Hides the real pad so games can't grab it instead of the virtual one. <span class="req req--must">Not optional</span> <span class="req req--auto">Installed for you</span></dd>
+        <dt>Anything else?</dt><dd>No. The .NET runtime is bundled in the installer.</dd>
+      </dl>
+    </div>
+    <div class="spec panel reveal" data-delay="100">
+      <h3>Tested so far</h3>
+      <ul class="verified">
+        <li><span class="badge badge--ok"><svg><use href="#i-check"/></svg></span><strong>Sekiro: Shadows Die Twice</strong><small>Works — detection, controls and two players confirmed in game</small></li>
+        <li><span class="badge badge--wait"><svg><use href="#i-clock"/></svg></span><strong>Call of Duty: Black Ops III</strong><small>Not tested yet — not a known problem, just not tried</small></li>
+        <li><span class="badge badge--ok"><svg><use href="#i-check"/></svg></span><strong>Shanwan "Twin USB Joystick" receiver</strong><small>Tested end to end, two pads as two players</small></li>
+        <li><span class="badge badge--wait"><svg><use href="#i-clock"/></svg></span><strong>Other USB gamepads</strong><small>Should work once calibrated, not verified yet</small></li>
+      </ul>
+      <p class="spec-foot">Tried another pad or game? <a href="https://github.com/Isaac-Onyango-Dev/Dovetail/issues">Tell us how it went</a>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PATCH NOTES ============ -->
+<section class="patches" id="patches">
+  <header class="sec-head sec-head--center">
+    <p class="eyebrow">Patch notes <b>/ 06</b></p>
+    <h2>What's <em>new.</em></h2>
+    <p class="sec-sub">Pulled live from GitHub Releases. Nothing trimmed.</p>
+  </header>
+  <div class="feed" id="feed" aria-live="polite" aria-busy="true">
+    <div class="skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+  <a class="btn-ghost feed-all" href="https://github.com/Isaac-Onyango-Dev/Dovetail/releases">Every release on GitHub</a>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="faq" id="faq">
+  <header class="sec-head">
+    <p class="eyebrow">Help <b>/ 07</b></p>
+    <h2>Questions <em>people ask.</em></h2>
+  </header>
+  <div class="faq-cols">
+    <details class="qa panel">
+      <summary><span class="glyph">?</span><span>Will it work with my controller?</span><i aria-hidden="true"></i></summary>
+      <div class="qa-body"><p>Probably, but it hasn't been checked. The one receiver tested end to end is the Shanwan "Twin USB Joystick" (VID 0810, PID 0001).</p><p>Calibration measures whatever your pad actually sends, so other standard USB gamepads should work once calibrated. <a href="https://github.com/Isaac-Onyango-Dev/Dovetail/issues">Let us know</a> how yours does.</p></div>
+    </details>
+    <details class="qa panel">
+      <summary><span class="glyph">?</span><span>Which games does it work with?</span><i aria-hidden="true"></i></summary>
+      <div class="qa-body"><p>Games that accept an Xbox 360 controller should see Dovetail's. So far <strong>Sekiro: Shadows Die Twice</strong> is confirmed in game. <strong>Call of Duty: Black Ops III</strong> hasn't been tested yet, which doesn't mean it fails.</p></div>
+    </details>
+    <details class="qa panel">
+      <summary><span class="glyph">?</span><span>Why does Windows warn me about the installer?</span><i aria-hidden="true"></i></summary>
+      <div class="qa-body"><p>It isn't code-signed yet, so SmartScreen doesn't recognise it. Click <strong>More info</strong>, then <strong>Run anyway</strong>. Each release lists a SHA-256 checksum if you'd like to check the download.</p></div>
+    </details>
+    <details class="qa panel">
+      <summary><span class="glyph">?</span><span>Do I need to install anything else?</span><i aria-hidden="true"></i></summary>
+      <div class="qa-body"><p>No. The installer brings everything, and Dovetail sets up its two drivers, ViGEmBus and HidHide, on first run. Windows asks for permission once.</p></div>
+    </details>
+    <details class="qa panel">
+      <summary><span class="glyph">?</span><span>Why does it need HidHide? Can I skip it?</span><i aria-hidden="true"></i></summary>
+      <div class="qa-body"><p>No. Without HidHide the real pad stays visible next to the virtual Xbox controller. Many games check both, grab the real pad, and ignore Dovetail even while it's translating perfectly.</p></div>
+    </details>
+    <details class="qa panel">
+      <summary><span class="glyph">?</span><span>Can I undo everything?</span><i aria-hidden="true"></i></summary>
+      <div class="qa-body"><p>Yes. Uninstall from Add/Remove Programs or the Start Menu. It removes what Dovetail added, un-hides your pad, and writes a restore point first. Your calibration is kept in case you come back, and the two drivers stay installed since other apps may use them.</p></div>
+    </details>
+    <details class="qa panel">
+      <summary><span class="glyph">?</span><span>Does it update itself?</span><i aria-hidden="true"></i></summary>
+      <div class="qa-body"><p>From v1.2.0 on, when you ask: Settings → <strong>Updates</strong> → <strong>Check for updates</strong>. It never checks in the background.</p></div>
+    </details>
+    <details class="qa panel">
+      <summary><span class="glyph">?</span><span>Can I use it without installing?</span><i aria-hidden="true"></i></summary>
+      <div class="qa-body"><p>Yes. Each release has a <a data-zip href="{{ZIP_URL}}">portable .zip</a>. Keep its three .exe files in the same folder; they rely on each other.</p></div>
+    </details>
+    <details class="qa panel">
+      <summary><span class="glyph">?</span><span>Does rumble work?</span><i aria-hidden="true"></i></summary>
+      <div class="qa-body"><p>Not yet. Vibration isn't sent to the pad.</p></div>
+    </details>
+    <details class="qa panel">
+      <summary><span class="glyph">?</span><span>Something went wrong.</span><i aria-hidden="true"></i></summary>
+      <div class="qa-body"><p><a href="https://github.com/Isaac-Onyango-Dev/Dovetail/issues">Open an issue on GitHub</a> with your pad's name, your Windows version and what happened.</p></div>
+    </details>
+  </div>
+</section>
+
+<!-- ============ READY ============ -->
+<section class="ready" id="ready">
+  <div class="ready-panel reveal">
+    <div>
+      <p class="eyebrow">Player select</p>
+      <h2>Ready, <em>player one?</em></h2>
+      <p>Free, open source, and no account. Download the installer, run it, and Dovetail walks you through the rest.</p>
+    </div>
+    <div class="ready-cta">
+      <a class="btn-a btn-a--lg" data-setup href="{{SETUP_URL}}">
+        <span class="glyph" aria-hidden="true">A</span>
+        <span>Download for Windows<small data-summary>v{{VERSION}} · Windows 10 / 11 · 64-bit</small></span>
+      </a>
+      <p class="alt">Rather not install? <a data-zip href="{{ZIP_URL}}">Portable .zip</a></p>
+    </div>
+  </div>
+  <details class="verify" id="verify" hidden>
+    <summary>Check your download (SHA-256)</summary>
+    <p>In PowerShell, in your Downloads folder, run <code id="hash-cmd"></code>. It should print <code id="hash"></code>.</p>
+  </details>
+</section>
+
 </main>
 
-<footer>
-  <div class="wrap">
+<!-- ============ FOOTER ============ -->
+<footer class="foot">
+  <div class="foot-top">
+    <a class="wordmark" href="#top">
+      <img src="favicon.svg" width="30" height="30" alt="">
+      <span class="wm" aria-hidden="true"><span class="wm-kicker">Pad → Xbox</span><span class="wm-name">Dovetail</span></span>
+      <span class="sr-only">Back to top</span>
+    </a>
+    <p class="foot-blurb">Makes a generic USB gamepad work in Windows games that only accept an Xbox controller. Free and open source.</p>
+  </div>
+  <nav class="foot-links" aria-label="Footer">
     <div>
-      <a class="brand" href="./"><img src="mark.svg" alt="" width="20" height="20">Dovetail</a>
-      <p class="ver" data-version>v{{VERSION}}</p>
+      <h4>Project</h4>
+      <a href="https://github.com/Isaac-Onyango-Dev/Dovetail">Source on GitHub</a>
+      <a href="https://github.com/Isaac-Onyango-Dev/Dovetail/issues">Report an issue</a>
+      <a href="https://github.com/Isaac-Onyango-Dev/Dovetail/releases">All releases</a>
     </div>
     <div>
-      <p><a href="https://github.com/Isaac-Onyango-Dev/Dovetail">Source on GitHub</a> · <a href="https://github.com/Isaac-Onyango-Dev/Dovetail/issues">Report an issue</a> · <a href="https://github.com/Isaac-Onyango-Dev/Dovetail/blob/main/LICENSE">MIT licence</a></p>
-      <p>Dovetail depends on <a href="https://github.com/nefarius/ViGEmBus">ViGEmBus</a> and <a href="https://github.com/nefarius/HidHide">HidHide</a> by Nefarius Software Solutions, which it downloads from their own release assets and installs; it does not redistribute them.</p>
+      <h4>Play</h4>
+      <a data-setup href="{{SETUP_URL}}">Download for Windows</a>
+      <a data-zip href="{{ZIP_URL}}">Portable .zip</a>
+      <a href="#faq">FAQ</a>
+      <a href="#patches">Patch notes</a>
     </div>
+    <div>
+      <h4>Legal</h4>
+      <a href="https://github.com/Isaac-Onyango-Dev/Dovetail/blob/main/LICENSE">MIT licence</a>
+      <a href="https://github.com/nefarius/ViGEmBus">ViGEmBus</a>
+      <a href="https://github.com/nefarius/HidHide">HidHide</a>
+    </div>
+  </nav>
+  <p class="foot-credit">Dovetail depends on <a href="https://github.com/nefarius/ViGEmBus">ViGEmBus</a> and <a href="https://github.com/nefarius/HidHide">HidHide</a> by Nefarius Software Solutions, which it downloads from their own release assets and installs; it does not redistribute them.</p>
+  <div class="foot-bottom">
+    <p>© <span id="year">2026</span> Isaac Onyango · MIT licensed · Xbox is a trademark of Microsoft; Dovetail isn't affiliated with it.</p>
+    <p class="foot-ver" data-version>v{{VERSION}}</p>
   </div>
 </footer>
 
-<script>
-  const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
-
-  const bar = $('#bar'), small = bar.querySelector('.btn-sm');
-  const onScroll = () => {
-    const on = scrollY > 480;
-    bar.classList.toggle('scrolled', on);
-    small.tabIndex = on ? 0 : -1;
-  };
-  addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-
-  $('#replay').addEventListener('click', () => {
-    $('#pad').getAnimations({ subtree: true }).forEach(a => { a.cancel(); a.play(); });
-  });
-
-  if (!/Windows/.test(navigator.userAgent)) $('#winonly').hidden = false;
-
-  // The deploy step stamps the latest release's links and version into this page, so the
-  // buttons work with no JavaScript. This refreshes them live, adds the download count and
-  // the release notes, and caches the one API call for ten minutes: GitHub allows 60
-  // unauthenticated calls an hour per visitor.
-  const API = 'https://api.github.com/repos/Isaac-Onyango-Dev/Dovetail/releases?per_page=100';
-  const KEY = 'dovetail-releases', TTL = 10 * 60 * 1000;
-
-  async function releases() {
-    let cached = null;
-    try { cached = JSON.parse(localStorage.getItem(KEY)); } catch {}
-    if (cached && Date.now() - cached.t < TTL) return cached.d;
-    try {
-      // html+json asks GitHub to render and sanitise each release body for us.
-      const r = await fetch(API, { headers: { Accept: 'application/vnd.github.html+json' } });
-      if (!r.ok) throw new Error(r.status);
-      const d = (await r.json()).filter(x => !x.draft).map(x => ({
-        tag: x.tag_name, url: x.html_url, date: x.published_at, pre: x.prerelease, html: x.body_html || '',
-        assets: x.assets.map(a => ({ name: a.name, url: a.browser_download_url, n: a.download_count, digest: a.digest }))
-      }));
-      try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), d })); } catch {}
-      return d;
-    } catch (e) {
-      if (cached) return cached.d;   // stale beats nothing
-      throw e;
-    }
-  }
-
-  function countUp(el, total) {
-    const fmt = n => `${n.toLocaleString()} download${n === 1 ? '' : 's'}`;
-    el.hidden = false;
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = fmt(total); return; }
-    const start = performance.now(), ms = 1200;
-    const tick = now => {
-      const p = Math.min(1, (now - start) / ms);
-      el.textContent = fmt(Math.round(total * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }
-
-  function badge(el) {
-    el.hidden = false;
-    el.innerHTML = '<img alt="" onerror="this.remove()" src="https://img.shields.io/github/downloads/Isaac-Onyango-Dev/Dovetail/total?style=flat-square&label=downloads&color=B8372B&labelColor=282C34">';
-  }
-
-  const date = s => new Date(s).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-
-  releases().then(list => {
-    const count = $('#count');
-    const total = list.reduce((sum, r) => sum + r.assets.reduce((s, a) => s + (a.n || 0), 0), 0);
-    Number.isFinite(total) ? countUp(count, total) : badge(count);
-
-    const latest = list.find(r => !r.pre);
-    const setup = latest && latest.assets.find(a => /^DovetailSetup-.+\.exe$/.test(a.name));
-    if (setup) {
-      const zip = latest.assets.find(a => /portable\.zip$/.test(a.name));
-      $$('[data-setup]').forEach(a => a.href = setup.url);
-      if (zip) $$('[data-zip]').forEach(a => a.href = zip.url);
-      $$('[data-version]').forEach(s => s.textContent = latest.tag);
-      if (setup.digest && setup.digest.startsWith('sha256:')) {
-        $('#hash').textContent = setup.digest.slice(7);
-        $('#hashcmd').textContent = `Get-FileHash .\\${setup.name}`;
-        $('#verify').hidden = false;
-      }
-    }
-
-    const rels = $('#rels');
-    rels.replaceChildren(...list.map((r, i) => {
-      const d = document.createElement('details');
-      d.className = 'rel';
-      d.open = i === 0;
-      d.innerHTML = `<summary><span class="v"></span><span class="d"></span>${r === latest ? '<span class="latest">Latest</span>' : ''}</summary><div class="notes"></div>`;
-      d.querySelector('.v').textContent = `Dovetail ${r.tag}`;
-      d.querySelector('.d').textContent = date(r.date);
-      d.querySelector('.notes').innerHTML = r.html || `<p><a href="${r.url}">Read on GitHub</a></p>`;
-      return d;
-    }));
-  }).catch(() => {
-    badge($('#count'));
-    $('#rels').innerHTML = '<p class="fallback">Release notes couldn\'t be loaded right now. <a href="https://github.com/Isaac-Onyango-Dev/Dovetail/releases">Read them on GitHub</a>.</p>';
-  });
-</script>
+<div class="toasts" id="toasts" aria-live="polite"></div>
 </body>
 </html>

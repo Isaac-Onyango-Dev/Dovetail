@@ -2,49 +2,78 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Page not found — Dovetail</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Game over — Dovetail</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#12151A">
-<!-- Served for any missing path, at any depth, so every URL here is absolute. -->
-<link rel="icon" href="/Dovetail/mark.svg" type="image/svg+xml">
-<link rel="icon" href="/Dovetail/img/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="/Dovetail/img/apple-touch-icon.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0A0A0E">
+<!-- Served for any missing path at any depth, so every URL here is absolute. -->
+<link rel="icon" href="/Dovetail/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/Dovetail/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/Dovetail/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="/Dovetail/site.css">
-<style>
-  .lost { min-height: calc(100vh - 64px - 140px); display: grid; align-content: center; padding-block: 64px; }
-  .lost .big { width: 72px; height: 72px; margin-bottom: 28px; }
-  .lost h1 { font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1; margin-bottom: 1rem; }
-  .lost .code { font: 500 0.85rem var(--mono); color: var(--accent); margin-bottom: 12px; letter-spacing: 0.08em; }
-  .lost p { color: var(--dim); font-size: 1.1rem; }
-  .lost .btn { margin-top: 1rem; width: fit-content; }
-</style>
 </head>
 <body>
-<header class="bar scrolled">
-  <div class="wrap">
-    <a class="brand" href="/Dovetail/"><img src="/Dovetail/mark.svg" alt="" width="24" height="24">Dovetail</a>
-    <nav aria-label="Sections">
-      <a href="/Dovetail/#faq">FAQ</a>
-      <a href="https://github.com/Isaac-Onyango-Dev/Dovetail">GitHub</a>
-    </nav>
-  </div>
+<div class="embers" aria-hidden="true">
+  <span class="blob blob--ember"></span>
+  <span class="blob blob--wine"></span>
+</div>
+<div class="grain" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="topbar" data-stuck="1">
+  <nav class="nav" aria-label="Main">
+    <a class="wordmark" href="/Dovetail/">
+      <img src="/Dovetail/favicon.svg" width="30" height="30" alt="">
+      <span class="wm" aria-hidden="true"><span class="wm-kicker">Pad → Xbox</span><span class="wm-name">Dovetail</span></span>
+      <span class="sr-only">Dovetail home</span>
+    </a>
+    <div class="nav-tail" style="margin-left:auto">
+      <a class="nav-cta" href="/Dovetail/#ready">Get it free</a>
+    </div>
+  </nav>
 </header>
-<main class="traces">
-  <div class="wrap lost">
-    <img class="big" src="/Dovetail/mark.svg" alt="">
-    <div class="code">404 · NO DEVICE AT THIS ADDRESS</div>
-    <h1>This page didn't connect.</h1>
-    <p>Whatever was here isn't anymore, or never was. The download is on the home page.</p>
-    <a class="btn" href="/Dovetail/">Go to the Dovetail home page</a>
+
+<main class="over">
+  <div>
+    <p class="code">Error 404 · Page not found</p>
+    <h1>Game<br>over</h1>
+    <p>This page doesn't exist, or it did and then it didn't. The download is safe on the home page.</p>
+    <p class="continue" aria-hidden="true">Continue? <b id="count">9</b></p>
+    <div class="over-actions">
+      <a class="btn-a" href="/Dovetail/" id="home"><span class="glyph" aria-hidden="true">A</span><span>Continue</span></a>
+      <a class="btn-ghost" href="https://github.com/Isaac-Onyango-Dev/Dovetail"><span class="glyph" aria-hidden="true">B</span>Quit to GitHub</a>
+    </div>
   </div>
 </main>
-<footer>
-  <div class="wrap">
-    <a class="brand" href="/Dovetail/"><img src="/Dovetail/mark.svg" alt="" width="20" height="20">Dovetail</a>
-    <p>MIT licensed · uses <a href="https://github.com/nefarius/ViGEmBus">ViGEmBus</a> and <a href="https://github.com/nefarius/HidHide">HidHide</a> by Nefarius Software Solutions.</p>
-  </div>
-</footer>
+
+<script>
+  // An arcade countdown that goes nowhere on its own: it just stops at zero.
+  const count = document.getElementById('count');
+  let n = 9;
+  const tick = setInterval(() => {
+    n -= 1;
+    count.textContent = n > 0 ? n : '0 — press A';
+    if (n <= 0) clearInterval(tick);
+  }, 1000);
+
+  // Press A on a real pad (or the A key) to continue, B to quit.
+  addEventListener('keydown', (e) => {
+    if (e.key === 'a' || e.key === 'A') location.href = '/Dovetail/';
+  });
+  if ('getGamepads' in navigator) {
+    const poll = () => {
+      for (const pad of navigator.getGamepads()) {
+        if (pad && pad.buttons[0] && pad.buttons[0].pressed) { location.href = '/Dovetail/'; return; }
+        if (pad && pad.buttons[1] && pad.buttons[1].pressed) { location.href = 'https://github.com/Isaac-Onyango-Dev/Dovetail'; return; }
+      }
+      requestAnimationFrame(poll);
+    };
+    addEventListener('gamepadconnected', () => requestAnimationFrame(poll), { once: true });
+  }
+</script>
 </body>
 </html>

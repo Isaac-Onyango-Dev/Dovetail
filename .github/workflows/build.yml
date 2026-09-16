@@ -158,11 +158,15 @@ jobs:
   # download button work with JavaScript off or the API rate-limited.
   #
   # Needs Settings > Pages > Source set to "GitHub Actions", and a v* tag rule on the
-  # github-pages environment for the tag run to be allowed to deploy.
+  # github-pages environment for the tag run to be allowed to deploy. deploy-pages refuses a
+  # job that does not name the environment.
   pages:
     needs: build
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: https://isaac-onyango-dev.github.io/Dovetail/
     permissions:
       contents: read
       pages: write
