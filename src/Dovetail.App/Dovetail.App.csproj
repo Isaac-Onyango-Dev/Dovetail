@@ -16,6 +16,12 @@
          AppUserModelID, which a WinUI toast would require. -->
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- The mark, embedded as the exe's Win32 icon. Explorer, the Start Menu and desktop
+         shortcuts, Add/Remove Programs, and every WPF window's title bar and taskbar button
+         read this; without it they all fall back to the default program icon, and only the
+         tray (drawn in code by TrayIcon) shows the mark. 16-64 px are bitmaps, 256 px is PNG,
+         rendered from the same geometry as TrayIcon.MarkHalf. -->
+    <ApplicationIcon>Dovetail.ico</ApplicationIcon>
     <!-- WFAC010 tells WinForms apps to set DPI mode via Application.SetHighDpiMode instead
          of in the manifest. That advice does not apply here. This is a WPF app that borrows
          one WinForms control, and WPF reads DPI awareness from the manifest before any
@@ -39,7 +45,7 @@
     <Product>Dovetail</Product>
     <AssemblyTitle>Dovetail Gamepad Emulator</AssemblyTitle>
     <Company>Dovetail</Company>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

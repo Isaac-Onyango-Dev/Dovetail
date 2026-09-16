@@ -11,6 +11,7 @@
 # as a WPF resource, and a converted PNG is a corrupt PNG.
 *.png   binary
 *.jpg   binary
+*.ico   binary
 *.jfif  binary
 *.mp4   binary
 *.dll   binary

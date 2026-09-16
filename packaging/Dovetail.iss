@@ -4,11 +4,11 @@
 ; install into Program Files, a Start Menu entry, an Add/Remove Programs entry, and an
 ; uninstaller that reverses what Dovetail did to the machine rather than only deleting files.
 ;
-; Build:  ISCC.exe /DAppVersion=1.2.0 packaging\Dovetail.iss
+; Build:  ISCC.exe /DAppVersion=1.2.1 packaging\Dovetail.iss
 ; Expects build-dist.ps1 to have staged dist\Dovetail first.
 
 #ifndef AppVersion
-  #define AppVersion "1.2.0"
+  #define AppVersion "1.2.1"
 #endif
 
 #define AppName        "Dovetail"
@@ -41,6 +41,7 @@ OutputDir=..\dist
 OutputBaseFilename=DovetailSetup-{#AppVersion}
 UninstallDisplayName={#AppName}
 UninstallDisplayIcon={app}\{#AppExe}
+SetupIconFile=..\src\Dovetail.App\Dovetail.ico
 
 ; x64 only: the HID and ViGEm interop is compiled x64 and there is no 32-bit build.
 ArchitecturesAllowed=x64compatible
