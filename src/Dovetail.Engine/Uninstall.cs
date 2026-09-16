@@ -77,12 +77,10 @@ internal static class Uninstall
         Console.WriteLine();
 
         Console.WriteLine(" 1. Auto-start entry, HKCU Run");
-        if (plan.AutoStartCommand is null && plan.LegacyAutoStartCommand is null)
+        if (plan.AutoStartCommand is null)
             Console.WriteLine("      (none present)");
-        if (plan.AutoStartCommand is not null)
+        else
             Console.WriteLine($"      \"Dovetail Gamepad Emulator\" = {plan.AutoStartCommand}");
-        if (plan.LegacyAutoStartCommand is not null)
-            Console.WriteLine($"      \"{AutoStart.LegacyValueName}\" = {plan.LegacyAutoStartCommand}   (pre-rename)");
         Console.WriteLine("      The value only. Every other startup entry is left alone.");
         Console.WriteLine();
 

@@ -8,7 +8,7 @@ namespace Dovetail.Core;
 /// One virtual Xbox 360 controller on the ViGEmBus driver.
 ///
 /// This is the whole reason Dovetail exists. The physical pad speaks only raw HID, and the
-/// target games poll XInput, so nothing bridges the two until a real XUSB device exists at
+/// target games poll XInput, so nothing connects the two until a real XUSB device exists at
 /// the driver level. ViGEmBus creates exactly that: the virtual pad enumerates as
 /// VID_045E/PID_028E on the xusb22 service, which every XInput runtime version sees,
 /// including the xinput1_3 that Sekiro imports (Findings Log 0.6).

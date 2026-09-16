@@ -25,8 +25,7 @@ namespace Dovetail.Core;
 ///
 /// <item><b>Allow-list entries that are not ours.</b> The list belongs to the operator and
 /// commonly names DS4Windows or Steam. Only entries whose file name is in
-/// <see cref="HidHideAccess.AllOwnNames"/> are touched, which is the three current
-/// executables plus the three pre-rename ones.</item>
+/// <see cref="HidHideAccess.AllOwnNames"/>, the three Dovetail executables, are touched.</item>
 ///
 /// <item><b>Any HidHide setting Dovetail did not make.</b> A device the user had already
 /// hidden stays hidden; a cloak that was already on stays on. What setup itself changed is
@@ -92,7 +91,6 @@ public sealed class UninstallCleanup
     public sealed class Plan
     {
         public string? AutoStartCommand { get; set; }
-        public string? LegacyAutoStartCommand { get; set; }
         public List<string> HidHideEntries { get; set; } = [];
         public bool HidHideInstalled { get; set; }
         public bool NeedsElevationForHidHide { get; set; }
@@ -107,7 +105,7 @@ public sealed class UninstallCleanup
         public bool ProfilesExist => ProfileFileCount > 0;
 
         public bool AnythingToDo =>
-            AutoStartCommand is not null || LegacyAutoStartCommand is not null
+            AutoStartCommand is not null
             || HidHideEntries.Count > 0 || ProfilesExist
             || HidHideDevicesToUnhide.Count > 0 || WillTurnCloakOff;
     }
@@ -117,7 +115,6 @@ public sealed class UninstallCleanup
         var plan = new Plan
         {
             AutoStartCommand = AutoStart.CurrentCommand(),
-            LegacyAutoStartCommand = AutoStart.LegacyCommand(),
             HidHideInstalled = HidHideAccess.Installed,
             ProfileDirectory = ProfileDirectory,
         };
@@ -180,8 +177,6 @@ public sealed class UninstallCleanup
         public string ProductVersion { get; set; } = "";
         public string? AutoStartValueName { get; set; }
         public string? AutoStartCommand { get; set; }
-        public string? LegacyAutoStartValueName { get; set; }
-        public string? LegacyAutoStartCommand { get; set; }
         public List<string> HidHideEntriesRemoved { get; set; } = [];
         public List<string> HidHideDevicesUnhidden { get; set; } = [];
         public bool CloakTurnedOff { get; set; }
@@ -217,30 +212,19 @@ public sealed class UninstallCleanup
 
         // ---- 1. auto-start ----
         string? current = AutoStart.CurrentCommand();
-        string? legacy = AutoStart.LegacyCommand();
 
-        if (current is null && legacy is null)
+        if (current is null)
         {
             L("auto-start: no entry to remove");
         }
         else
         {
-            if (current is not null)
-            {
-                r.Removed.AutoStartValueName = AutoStartValueNameForRestore;
-                r.Removed.AutoStartCommand = current;
-            }
-            if (legacy is not null)
-            {
-                r.Removed.LegacyAutoStartValueName = AutoStart.LegacyValueName;
-                r.Removed.LegacyAutoStartCommand = legacy;
-            }
+            r.Removed.AutoStartValueName = AutoStartValueNameForRestore;
+            r.Removed.AutoStartCommand = current;
 
-            // Disable deletes both value names and leaves every other Run entry untouched.
+            // Disable deletes our value by name and leaves every other Run entry untouched.
             if (AutoStart.Disable())
-                L($"auto-start: removed {(current is not null ? "the entry" : "")}" +
-                  $"{(current is not null && legacy is not null ? " and " : "")}" +
-                  $"{(legacy is not null ? "the pre-rename entry" : "")}, other startup items untouched");
+                L("auto-start: removed the entry, other startup items untouched");
             else
                 Problem("auto-start: the Run value could not be deleted");
         }
@@ -437,13 +421,6 @@ public sealed class UninstallCleanup
             }
         }
         else L("auto-start: nothing was removed, nothing to restore");
-
-        // The pre-rename value is deliberately NOT restored. It pointed at Bridge.exe, which
-        // no build produces any more, so putting it back would recreate the stale entry the
-        // rename existed to clear.
-        if (rp.LegacyAutoStartCommand is { Length: > 0 })
-            L("auto-start: the pre-rename entry is not restored; it named an executable that " +
-              "no longer exists. Its command is recorded in the restore point.");
 
         // ---- HidHide ----
         bool anyHidHide = rp.HidHideEntriesRemoved.Count > 0

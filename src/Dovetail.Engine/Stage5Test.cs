@@ -61,7 +61,6 @@ internal static class Stage5Test
             FirstRunGating(dir);
             PortFileMigration();
             AutoStartRoundTrip();
-            LegacyAutoStartValue();
             ProfileStorage();
             UninstallCleanupRoundTrip();
             StickFeelEditing(dir);
@@ -316,8 +315,8 @@ internal static class Stage5Test
 
         // Save and restore whatever is really there, so the test cannot leave the machine
         // set up differently from how it found it.
-        string? original = AutoStart.CurrentCommand();
-        bool wasEnabled = AutoStart.IsEnabled();
+        string? original = OriginalAutoStart();
+        bool wasEnabled = original is not null;
         Console.WriteLine($"      before: {(wasEnabled ? "enabled - " + original : "not present")}");
 
         try
@@ -351,58 +350,7 @@ internal static class Stage5Test
         Console.WriteLine();
     }
 
-    // ------------------------------------------------------------------ 9. the rename hazard
-
-    /// <summary>
-    /// The migration hazard named in Findings Log 5.6.6, put under test.
-    ///
-    /// The auto-start entry is keyed by value name, and the name changed with the product. A
-    /// build that writes the new value without deleting the old one leaves Windows launching
-    /// Bridge.exe at every sign-in, an executable no build produces any more. That failure is
-    /// invisible on the machine that made it - the app still starts, from the new entry - and
-    /// shows up only as a startup error on a user's PC, so it gets a test rather than a note.
-    /// </summary>
-    private static void LegacyAutoStartValue()
-    {
-        Console.WriteLine(" 9. AUTO-START RENAME - the pre-rename value never outlives the new one");
-
-        string? original = AutoStart.CurrentCommand();
-        string? originalLegacy = AutoStart.LegacyCommand();
-        Console.WriteLine($"      before: current {(original is null ? "absent" : "present")}, " +
-                          $"legacy {(originalLegacy is null ? "absent" : "present")}");
-
-        try
-        {
-            // Stand up the exact state an upgrade meets: the old name, nothing else.
-            AutoStart.Disable();
-            WriteRunValue(AutoStart.LegacyValueName, @"""C:\Program Files\Bridge\Bridge.exe"" --tray");
-            Ok("a pre-rename entry is in place to migrate", AutoStart.LegacyCommand() is not null);
-            Check("and the new name is not yet there", AutoStart.IsEnabled(), false);
-
-            string fake = Path.Combine(Path.GetTempPath(), "DovetailAutoStartTest", "Dovetail.exe");
-            Check("enable writes the new value", AutoStart.Enable(fake), true);
-            Ok("the new entry is present", AutoStart.IsEnabled());
-            Ok("THE PRE-RENAME ENTRY IS GONE", AutoStart.LegacyCommand() is null);
-
-            // And the other direction: disabling must not leave the old one behind either.
-            WriteRunValue(AutoStart.LegacyValueName, @"""C:\Program Files\Bridge\Bridge.exe"" --tray");
-            Check("disable reports success", AutoStart.Disable(), true);
-            Check("the new entry is gone", AutoStart.IsEnabled(), false);
-            Ok("and so is the pre-rename one", AutoStart.LegacyCommand() is null);
-
-            Check("RemoveLegacy on a clean machine is harmless", AutoStart.RemoveLegacy(), true);
-        }
-        finally
-        {
-            AutoStart.Disable();
-            if (original is not null) WriteRunValue("Dovetail Gamepad Emulator", original);
-            if (originalLegacy is not null) WriteRunValue(AutoStart.LegacyValueName, originalLegacy);
-            Console.WriteLine("      registry left exactly as it was found");
-        }
-        Console.WriteLine();
-    }
-
-    // ------------------------------------------------------------------ 12. stick feel
+    // ------------------------------------------------------------------ 11. stick feel
 
     /// <summary>
     /// The four numbers the settings cards now edit, and the guarantee that editing them there
@@ -417,7 +365,7 @@ internal static class Stage5Test
     /// </summary>
     private static void StickFeelEditing(string dir)
     {
-        Console.WriteLine(" 12. STICK FEEL - one implementation behind the sliders and the tune command");
+        Console.WriteLine(" 11. STICK FEEL - one implementation behind the sliders and the tune command");
 
         string path = SlotRegistry.PathForSlot(dir, 1);
         if (!File.Exists(path)) { Console.WriteLine("      (no slot1 profile to work from, skipped)"); Console.WriteLine(); return; }
@@ -511,7 +459,7 @@ internal static class Stage5Test
         Console.WriteLine();
     }
 
-    // ------------------------------------------------------------------ 13. dependencies
+    // ------------------------------------------------------------------ 12. dependencies
 
     /// <summary>
     /// The Section 5.7 contract, in the parts that can be checked without installing a driver.
@@ -521,7 +469,7 @@ internal static class Stage5Test
     /// </summary>
     private static void DependencyContract()
     {
-        Console.WriteLine(" 13. DEPENDENCIES - what is required, and which release would be fetched");
+        Console.WriteLine(" 12. DEPENDENCIES - what is required, and which release would be fetched");
 
         var mgr = new DependencyManager();
         var all = mgr.DetectAll();
@@ -576,7 +524,7 @@ internal static class Stage5Test
         Console.WriteLine();
     }
 
-    // ------------------------------------------------------------------ 14. HidHide ownership
+    // ------------------------------------------------------------------ 13. HidHide ownership
 
     /// <summary>
     /// The rule that decides what an uninstall undoes: Dovetail reverses the HidHide settings
@@ -589,7 +537,7 @@ internal static class Stage5Test
     /// </summary>
     private static void HidHideOwnership(string dir)
     {
-        Console.WriteLine(" 14. HIDHIDE OWNERSHIP - an uninstall undoes only what setup changed");
+        Console.WriteLine(" 13. HIDHIDE OWNERSHIP - an uninstall undoes only what setup changed");
 
         string statePath = Path.Combine(dir, "hidhide-state.json");
         try
@@ -666,11 +614,24 @@ internal static class Stage5Test
         Console.WriteLine();
     }
 
+    /// <summary>
+    /// The auto-start entry to put back after a test. An entry naming the tests' own fake
+    /// executable is not the user's: it is what an interrupted run left behind, and restoring it
+    /// would keep Windows launching a missing file at every sign-in. Treated as absent.
+    /// </summary>
+    private static string? OriginalAutoStart()
+    {
+        string? cmd = AutoStart.CurrentCommand();
+        if (cmd is null || !cmd.Contains("DovetailAutoStartTest", StringComparison.OrdinalIgnoreCase)) return cmd;
+        Console.WriteLine($"      ignoring a leftover test entry: {cmd}");
+        return null;
+    }
+
     private static void WriteRunValue(string name, string command) =>
         Microsoft.Win32.Registry.SetValue(
             @"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run", name, command);
 
-    // ------------------------------------------------------------------ 10. profile storage
+    // ------------------------------------------------------------------ 9. profile storage
 
     /// <summary>
     /// Where profiles live after the packaging move, and the one-time migration that gets
@@ -683,7 +644,7 @@ internal static class Stage5Test
     /// </summary>
     private static void ProfileStorage()
     {
-        Console.WriteLine(" 10. PROFILE STORAGE - per-user folder, migrated once from the install folder");
+        Console.WriteLine(" 9. PROFILE STORAGE - per-user folder, migrated once from the install folder");
 
         string canonical = ProfileStore.CanonicalDirectory;
         Console.WriteLine($"      canonical: {canonical}");
@@ -750,7 +711,7 @@ internal static class Stage5Test
         Console.WriteLine();
     }
 
-    // ------------------------------------------------------------------ 11. uninstall
+    // ------------------------------------------------------------------ 10. uninstall
 
     /// <summary>
     /// The uninstaller, including the part that can break software this project did not write.
@@ -763,7 +724,7 @@ internal static class Stage5Test
     /// </summary>
     private static void UninstallCleanupRoundTrip()
     {
-        Console.WriteLine(" 11. UNINSTALL - reversible, ours only, and it asks before touching profiles");
+        Console.WriteLine(" 10. UNINSTALL - reversible, ours only, and it asks before touching profiles");
 
         // ---- the allow-list rule, against a realistic list ----
         var list = new List<string>
@@ -772,14 +733,14 @@ internal static class Stage5Test
             @"C:\Program Files (x86)\Steam\steam.exe",
             @"C:\Program Files\Dovetail\Dovetail.exe",
             @"C:\Program Files\Dovetail\dovetail-engine.exe",
-            @"C:\Users\someone\Desktop\old build\Bridge.exe",
+            @"C:\Users\someone\Desktop\old build\dovetail-diag.exe",
             @"C:\Program Files\Some Vendor\dovetail-notours.exe",
         };
         var ours = UninstallCleanup.FilterOurs(list);
         Check("our own executables are selected", ours.Count, 3);
         Ok("Dovetail.exe is ours", ours.Any(p => p.EndsWith(@"Dovetail\Dovetail.exe")));
-        Ok("a pre-rename Bridge.exe entry is ours too, and this is its last chance to go",
-           ours.Any(p => p.EndsWith("Bridge.exe")));
+        Ok("an entry from another folder is ours too, so a moved install is cleaned up",
+           ours.Any(p => p.EndsWith(@"old build\dovetail-diag.exe")));
         Ok("DS4WINDOWS IS NOT TOUCHED", !ours.Any(p => p.Contains("DS4Windows")));
         Ok("STEAM IS NOT TOUCHED", !ours.Any(p => p.Contains("steam.exe")));
         Ok("nor is a file that merely starts with our name",
@@ -788,8 +749,7 @@ internal static class Stage5Test
         // ---- removal and restore, for real, against scratch folders ----
         string profiles = Path.Combine(Path.GetTempPath(), "dovetail-uninst-p-" + Guid.NewGuid().ToString("N")[..8]);
         string restore = Path.Combine(Path.GetTempPath(), "dovetail-uninst-r-" + Guid.NewGuid().ToString("N")[..8]);
-        string? original = AutoStart.CurrentCommand();
-        string? originalLegacy = AutoStart.LegacyCommand();
+        string? original = OriginalAutoStart();
 
         try
         {
@@ -841,7 +801,6 @@ internal static class Stage5Test
         {
             AutoStart.Disable();
             if (original is not null) WriteRunValue("Dovetail Gamepad Emulator", original);
-            if (originalLegacy is not null) WriteRunValue(AutoStart.LegacyValueName, originalLegacy);
             try { Directory.Delete(profiles, true); } catch { }
             try { Directory.Delete(restore, true); } catch { }
             Console.WriteLine("      scratch folders removed, registry left as found");

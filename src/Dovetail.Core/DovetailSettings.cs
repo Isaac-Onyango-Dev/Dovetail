@@ -78,24 +78,11 @@ public sealed class DovetailSettings
 /// elevation, it is trivially visible to the user in Task Manager's Startup tab, and it is
 /// exactly the mechanism this project already audited and disabled for x360ce in Stage 0, so
 /// the operator can inspect and remove it the same way.
-///
-/// **The value name changed with the rename, and that is a migration hazard rather than a
-/// cosmetic edit.** A Run value is keyed by its name, so writing the new one does not replace
-/// the old one: it leaves a second entry pointing at Bridge.exe, an executable the packaging
-/// step no longer produces. Windows would then try to launch a missing file at every sign-in.
-/// Every write therefore deletes the legacy name first, and <see cref="Disable"/> removes both.
 /// </summary>
 public static class AutoStart
 {
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string ValueName = "Dovetail Gamepad Emulator";
-
-    /// <summary>
-    /// The name this entry carried before the Stage 6 rename. Read to migrate an existing
-    /// install, and deleted whenever the new value is written or removed. Kept public so the
-    /// uninstaller cleans up a machine that never ran a renamed build.
-    /// </summary>
-    public const string LegacyValueName = "Bridge Gamepad Emulator";
 
     public static bool IsEnabled()
     {
@@ -109,13 +96,6 @@ public static class AutoStart
         return k?.GetValue(ValueName) as string;
     }
 
-    /// <summary>The legacy entry's command, or null when there is none left to clean up.</summary>
-    public static string? LegacyCommand()
-    {
-        using var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(RunKey);
-        return k?.GetValue(LegacyValueName) as string;
-    }
-
     public static bool Enable(string exePath, string arguments = "--tray")
     {
         try
@@ -123,9 +103,6 @@ public static class AutoStart
             using var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(RunKey, writable: true)
                           ?? Microsoft.Win32.Registry.CurrentUser.CreateSubKey(RunKey);
             k.SetValue(ValueName, $"\"{exePath}\" {arguments}".Trim());
-            // After the new value, never before: a failure between the two leaves the old
-            // entry still starting something that works, rather than no entry at all.
-            DeleteLegacy(k);
             return true;
         }
         catch { return false; }
@@ -138,32 +115,6 @@ public static class AutoStart
             using var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
             if (k is null) return true;
             if (k.GetValue(ValueName) is not null) k.DeleteValue(ValueName);
-            DeleteLegacy(k);
-            return true;
-        }
-        catch { return false; }
-    }
-
-    /// <summary>
-    /// Drops the pre-rename entry if it is still there. Called on every write and every
-    /// removal, so an install that predates the rename is tidied by the first launch of a
-    /// renamed build without the user ever seeing the stale entry.
-    /// </summary>
-    public static bool RemoveLegacy()
-    {
-        try
-        {
-            using var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
-            return k is null || DeleteLegacy(k);
-        }
-        catch { return false; }
-    }
-
-    private static bool DeleteLegacy(Microsoft.Win32.RegistryKey k)
-    {
-        try
-        {
-            if (k.GetValue(LegacyValueName) is not null) k.DeleteValue(LegacyValueName);
             return true;
         }
         catch { return false; }

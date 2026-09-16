@@ -28,19 +28,9 @@ public static class HidHideAccess
     public static readonly string[] OwnExecutables =
         ["Dovetail.exe", "dovetail-diag.exe", "dovetail-engine.exe"];
 
-    /// <summary>
-    /// The file names this application shipped under before the Stage 6 rename.
-    ///
-    /// A machine that ran a Bridge build has those three paths on the allow list, and no build
-    /// produces them any more. They are ours to remove and nobody else's to keep, so both
-    /// <see cref="Register"/> and the uninstaller treat them exactly like the current names.
-    /// </summary>
-    public static readonly string[] LegacyExecutables =
-        ["Bridge.exe", "bridge-diag.exe", "bridge-engine.exe"];
-
-    /// <summary>Every file name that is ours, current and pre-rename.</summary>
+    /// <summary>Every file name that is ours, for matching allow-list entries.</summary>
     public static HashSet<string> AllOwnNames() =>
-        OwnExecutables.Concat(LegacyExecutables).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        OwnExecutables.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     private static readonly string[] CandidatePaths =
     [
@@ -108,9 +98,7 @@ public static class HidHideAccess
     /// carry one of our file names but point at a path that no longer exists.
     ///
     /// Only our own file names are ever removed. The list belongs to the operator and may well
-    /// contain DS4Windows or Steam; clearing entries that are not ours would break those. The
-    /// pre-rename names count as ours, so upgrading from a Bridge build clears the three dead
-    /// entries it left behind rather than accumulating six.
+    /// contain DS4Windows or Steam; clearing entries that are not ours would break those.
     ///
     /// Requires elevation, which is why <see cref="IsElevated"/> is checked first rather than
     /// leaving the caller to interpret a silent no-op from the CLI.

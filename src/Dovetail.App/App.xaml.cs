@@ -56,8 +56,6 @@ public partial class App : System.Windows.Application
         _service = new DovetailService(profileDir);
         _service.Log += m => Debug.WriteLine("[dovetail] " + m);
 
-        MigrateLegacyAutoStart();
-
         _tray = new TrayIcon(_service);
         _tray.OpenSettingsRequested += ShowSettings;
         _tray.RunCalibrationRequested += () => LaunchCalibration(null);
@@ -186,40 +184,6 @@ public partial class App : System.Windows.Application
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
         catch { }
-    }
-
-    /// <summary>
-    /// Carries a pre-rename auto-start entry across to the new value name.
-    ///
-    /// The old entry names Bridge.exe, which the packaging step no longer produces, so leaving
-    /// it would have Windows fail to launch a missing file at every sign-in. The user's choice
-    /// is honoured rather than re-asked: if they had auto-start on, it stays on and now points
-    /// at this executable. <see cref="AutoStart.Enable"/> and <see cref="AutoStart.Disable"/>
-    /// both drop the legacy name themselves, so this only has to handle the case where neither
-    /// is called because the user never opens settings again.
-    /// </summary>
-    private void MigrateLegacyAutoStart()
-    {
-        if (AutoStart.LegacyCommand() is null) return;
-
-        bool wanted = !AutoStart.IsEnabled();   // a new-name entry already won; just clean up
-        string exe = Environment.ProcessPath ?? "";
-
-        if (wanted && exe.Length > 0)
-        {
-            // Enable writes the new value and deletes the legacy one in the same call.
-            if (AutoStart.Enable(exe))
-            {
-                _service!.Settings.AutoStartOnLogin = true;
-                _service.Settings.AutoStartPromptShown = true;
-                _service.SaveSettings();
-                Debug.WriteLine("[dovetail] auto-start entry migrated from the pre-rename value name");
-                return;
-            }
-        }
-
-        AutoStart.RemoveLegacy();
-        Debug.WriteLine("[dovetail] removed the pre-rename auto-start entry");
     }
 
     /// <summary>
