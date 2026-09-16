@@ -349,6 +349,39 @@ internal static class SelfTest
            InputSweep.Script.Where(s => s.Xbox.Length > 0).All(s => xbox360Vocabulary.Contains(s.Xbox)));
         Console.WriteLine();
 
+        // ---- in-app update: picking the installer out of a releases-API answer ----
+        //
+        // Shaped like the real v1.1.0 response. Every refusal here is a case where the updater
+        // must fall back to the download page instead of installing something unchecked.
+        Console.WriteLine(" In-app update, release parsing:");
+        const string hash = "368371ffd98b18ed5109d3bd58ab7c9ace140409e704423e052a2a12079b4206";
+        static string Json(string tag, string assets) => $$"""{"tag_name":"{{tag}}","assets":[{{assets}}]}""";
+        static string Asset(string name, string digest) =>
+            $$"""{"name":"{{name}}","size":50967019,"digest":"{{digest}}","browser_download_url":"https://github.com/x/{{name}}"}""";
+        string zip = Asset("Dovetail-v1.2.0-win-x64-portable.zip", "sha256:" + hash);
+        string setup = Asset("DovetailSetup-1.2.0.exe", "sha256:" + hash);
+
+        var rel = AppUpdate.Parse(Json("v1.2.0", zip + "," + setup));
+        Check("picks the installer, not the portable zip", rel.AssetName, "DovetailSetup-1.2.0.exe");
+        Check("reads the version from the tag", rel.Version, "1.2.0");
+        Check("reads GitHub's SHA-256", rel.Sha256, hash);
+        Ok("same version is not an update (1.1.0 vs assembly 1.1.0.0)",
+           !(AppUpdate.Normalize(new Version(1, 1, 0)) > AppUpdate.Normalize(new Version(1, 1, 0, 0))));
+        Ok("newer version is an update", AppUpdate.Normalize(rel.Version) > AppUpdate.Normalize(new Version(1, 1, 0, 0)));
+
+        static bool Refused(string json)
+        {
+            try { AppUpdate.Parse(json); return false; }
+            catch (AppUpdate.UpdateException) { return true; }
+        }
+        Ok("refuses a release with no installer", Refused(Json("v1.2.0", zip)));
+        Ok("refuses an installer with no checksum", Refused(Json("v1.2.0", Asset("DovetailSetup-1.2.0.exe", ""))));
+        Ok("refuses a non-SHA-256 checksum", Refused(Json("v1.2.0", Asset("DovetailSetup-1.2.0.exe", "md5:abc"))));
+        Ok("refuses a tag that is not a version", Refused(Json("nightly", setup)));
+        Ok("refuses an asset name with a path in it",
+           Refused(Json("v1.2.0", Asset(@"DovetailSetup-\\..\\evil.exe", "sha256:" + hash))));
+        Console.WriteLine();
+
         Console.WriteLine(new string('=', 74));
         Console.WriteLine($" {_pass} passed, {_fail} failed");
         Console.WriteLine(new string('=', 74));

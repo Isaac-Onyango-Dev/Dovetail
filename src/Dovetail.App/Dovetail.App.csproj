@@ -39,7 +39,7 @@
     <Product>Dovetail</Product>
     <AssemblyTitle>Dovetail Gamepad Emulator</AssemblyTitle>
     <Company>Dovetail</Company>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

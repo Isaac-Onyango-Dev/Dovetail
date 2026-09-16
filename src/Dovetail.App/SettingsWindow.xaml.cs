@@ -229,6 +229,7 @@ public partial class SettingsWindow : Window
         GameList.ItemsSource = _games;
         RefreshFromService();
         RefreshDependencies();
+        UpdateVersion.Text = $"You have Dovetail {CurrentVersion}.";
     }
 
     public void RefreshFromService()
@@ -569,6 +570,149 @@ public partial class SettingsWindow : Window
         {
             MessageBox.Show("Could not start repair.\n\n" + ex.Message, "Dovetail",
                 MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    // ---------------------------------------------------------------- updates
+
+    private AppUpdate.Release? _update;
+
+    private static Version CurrentVersion =>
+        AppUpdate.Normalize(typeof(App).Assembly.GetName().Version ?? new Version(0, 0, 0));
+
+    private async void UpdateCheck_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateBusy("Checking for updates...", progress: null);
+        try
+        {
+            _update = await AppUpdate.GetLatestAsync();
+        }
+        catch (Exception ex)
+        {
+            UpdateFailed("Couldn't check for updates automatically", ex);
+            return;
+        }
+        UpdateIdle();
+
+        if (_update.Version <= CurrentVersion)
+        {
+            UpdateStatus.Text = $"Dovetail is up to date. No version newer than {CurrentVersion} has been released.";
+            return;
+        }
+
+        if (AppUpdate.IsInstalledCopy)
+        {
+            string size = _update.Size > 0 ? $", {_update.Size / 1048576.0:0} MB" : "";
+            UpdateStatus.Text = $"Version {_update.Version} is available{size}.";
+            UpdateInstallBtn.Content = "Install update";
+        }
+        else
+        {
+            UpdateStatus.Text = $"Version {_update.Version} is available. This copy of Dovetail runs " +
+                                "without being installed, so it can't update itself. Get the new version " +
+                                "from the Dovetail download page.";
+            UpdateInstallBtn.Content = "Open download page";
+        }
+        UpdateInstallBtn.Visibility = Visibility.Visible;
+    }
+
+    private async void UpdateInstall_Click(object sender, RoutedEventArgs e)
+    {
+        if (_update is not { } release) return;
+
+        if (!AppUpdate.IsInstalledCopy)
+        {
+            OpenDownloadPage("Opening the download page in your browser.");
+            return;
+        }
+
+        string file;
+        UpdateBusy($"Downloading version {release.Version}... 0%", progress: 0);
+        try
+        {
+            // At 100% the file is still being checked against GitHub's checksum, so say so.
+            var progress = new Progress<double>(p => UpdateBusy(p < 1
+                ? $"Downloading version {release.Version}... {p * 100:0}%"
+                : "Download complete. Checking the file...", p));
+            file = await AppUpdate.DownloadAsync(release, progress);
+        }
+        catch (Exception ex)
+        {
+            UpdateFailed("Couldn't update automatically", ex);
+            return;
+        }
+
+        UpdateBusy("Download complete. Starting the installer...\n\nWindows will ask for permission " +
+                   "to make changes. After that, Dovetail closes, installs the update in its own " +
+                   "progress window, and opens again by itself.", progress: 1);
+        try
+        {
+            // Off the UI thread: starting an elevated process blocks until the permission prompt
+            // is answered, and on this thread the window would not repaint the text above.
+            await Task.Run(() => AppUpdate.StartInstaller(file));
+        }
+        catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
+        {
+            // The person said no to the permission prompt. That is a choice, not a failure,
+            // so nothing is opened; they can try again.
+            UpdateIdle();
+            UpdateStatus.Text = "Update cancelled, so Dovetail wasn't changed. Select Install update to try again.";
+            return;
+        }
+        catch (Exception ex)
+        {
+            UpdateFailed("Couldn't update automatically", ex);
+            return;
+        }
+
+        // The installer is running and needs these files released. It relaunches Dovetail
+        // when it finishes, or opens the download page itself if it fails.
+        System.Windows.Application.Current.Shutdown();
+    }
+
+    /// <summary>Shows work in progress: buttons locked, status text, and the track when there is a fraction to show.</summary>
+    private void UpdateBusy(string status, double? progress)
+    {
+        UpdateCheckBtn.IsEnabled = false;
+        UpdateInstallBtn.IsEnabled = false;
+        UpdateStatus.Text = status;
+        UpdateTrack.Visibility = progress is null ? Visibility.Collapsed : Visibility.Visible;
+        UpdateTrack.UpdateLayout();
+        UpdateFill.Width = UpdateTrack.ActualWidth * (progress ?? 0);
+    }
+
+    private void UpdateIdle()
+    {
+        UpdateCheckBtn.IsEnabled = true;
+        UpdateInstallBtn.IsEnabled = true;
+        UpdateTrack.Visibility = Visibility.Collapsed;
+    }
+
+    private void UpdateFailed(string lead, Exception ex)
+    {
+        UpdateIdle();
+        UpdateInstallBtn.Visibility = Visibility.Collapsed;
+        string reason = ex switch
+        {
+            AppUpdate.UpdateException => ex.Message,
+            TaskCanceledException => "GitHub took too long to answer.",
+            System.Net.Http.HttpRequestException => $"Dovetail couldn't reach GitHub. {ex.Message}",
+            _ => ex.Message,
+        };
+        OpenDownloadPage($"{lead}, so the download page is opening in your browser instead.\n\nWhat went wrong: {reason}");
+    }
+
+    private void OpenDownloadPage(string status)
+    {
+        try
+        {
+            AppUpdate.OpenDownloadPage();
+            UpdateStatus.Text = status;
+        }
+        catch (Exception ex)
+        {
+            UpdateStatus.Text = $"{status}\n\nThe browser didn't open ({ex.Message}). " +
+                                $"Go to {AppUpdate.DownloadPage} to get the latest version.";
         }
     }
 }

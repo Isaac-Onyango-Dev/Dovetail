@@ -168,7 +168,11 @@
               <Border Grid.Row="0" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1">
                 <TabPanel IsItemsHost="True" Panel.ZIndex="1" HorizontalAlignment="Left"/>
               </Border>
-              <ContentPresenter Grid.Row="1" ContentSource="SelectedContent"/>
+              <!-- The name is load-bearing: TabControl's automation peer looks the page up
+                   by it, and without it nothing on any tab exists to a screen reader or to UI
+                   Automation. Found while automating the Updates tab, Findings Log 6.4. -->
+              <ContentPresenter x:Name="PART_SelectedContentHost" Grid.Row="1"
+                                ContentSource="SelectedContent"/>
             </Grid>
           </ControlTemplate>
         </Setter.Value>

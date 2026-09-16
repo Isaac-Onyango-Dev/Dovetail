@@ -92,7 +92,7 @@ To stage a complete, runnable folder the way it is installed:
 To build the installer, with [Inno Setup 6](https://jrsoftware.org/isdl.php) installed:
 
 ```powershell
-ISCC.exe /DAppVersion=1.1.0 packaging\Dovetail.iss   # -> dist\DovetailSetup-1.1.0.exe
+ISCC.exe /DAppVersion=1.2.0 packaging\Dovetail.iss   # -> dist\DovetailSetup-1.2.0.exe
 ```
 
 CI does both on every tag and attaches the results to the release. The tag and the `<Version>`
@@ -101,10 +101,10 @@ never disagree with the version on the release page.
 
 ### Tests
 
-Two hardware-free suites, 252 checks in total, both run on every push and pull request:
+Two hardware-free suites, 262 checks in total, both run on every push and pull request:
 
 ```powershell
-dovetail-engine selftest --profile tests\fixtures\profiles   # 84  - decoding and axis scaling
+dovetail-engine selftest --profile tests\fixtures\profiles   # 94  - decoding, axis scaling, update parsing
 dovetail-engine stage5   --dir     tests\fixtures\profiles   # 168 - slot identity, naming,
                                                              #       forgetting, per-game
                                                              #       overrides, first-run
