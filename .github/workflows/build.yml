@@ -10,10 +10,14 @@ on:
     tags: ['v*']
   pull_request:
     branches: [main]
+  # Used by a release: see "Refresh the download page" below.
+  workflow_dispatch:
 
-# Needed by 'gh release create' on a tag. Read-only for everything else.
+# contents: 'gh release create' on a tag. actions: re-running this workflow on main after a
+# release, so the download page picks the release up.
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -152,17 +156,26 @@ jobs:
             gh release create $tag $setup $zip --title "Dovetail $tag" --generate-notes
           }
 
-  # The site in docs/, deployed only after the build above passes. On a tag it runs after the
-  # release is published, so the stamped version and download links are the new release's.
-  # The page also refreshes them from the API in the browser; stamping is what makes the
-  # download button work with JavaScript off or the API rate-limited.
+      # The github-pages environment only accepts deployments from main, so a tag cannot deploy
+      # the site itself. Re-run this workflow on main instead: its pages job stamps the release
+      # that was just published. workflow_dispatch is the one event GITHUB_TOKEN may trigger.
+      - name: Refresh the download page
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build.yml --ref main --repo ${{ github.repository }}
+
+  # The site in docs/, deployed from main only, after the build above passes: on a push to main,
+  # and on the run a release dispatches once it is published, so the stamped version and
+  # download links are the new release's. The page also refreshes them from the API in the
+  # browser; stamping is what makes the download button work with JavaScript off or the API
+  # rate-limited.
   #
-  # Needs Settings > Pages > Source set to "GitHub Actions", and a v* tag rule on the
-  # github-pages environment for the tag run to be allowed to deploy. deploy-pages refuses a
-  # job that does not name the environment.
+  # Needs Settings > Pages > Source set to "GitHub Actions". deploy-pages refuses a job that
+  # does not name the environment.
   pages:
     needs: build
-    if: github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
