@@ -107,11 +107,11 @@ never disagree with the version on the release page.
 
 ### Tests
 
-Two hardware-free suites, 262 checks in total, both run on every push and pull request:
+Two hardware-free suites, 253 checks in total, both run on every push and pull request:
 
 ```powershell
 dovetail-engine selftest --profile tests\fixtures\profiles   # 94  - decoding, axis scaling, update parsing
-dovetail-engine stage5   --dir     tests\fixtures\profiles   # 168 - slot identity, naming,
+dovetail-engine stage5   --dir     tests\fixtures\profiles   # 159 - slot identity, naming,
                                                              #       forgetting, per-game
                                                              #       overrides, first-run
                                                              #       gating, auto-start,
