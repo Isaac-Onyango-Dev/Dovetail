@@ -151,3 +151,45 @@ jobs:
             Write-Host "no notes file at $notes, generating from commits"
             gh release create $tag $setup $zip --title "Dovetail $tag" --generate-notes
           }
+
+  # The site in docs/, deployed only after the build above passes. On a tag it runs after the
+  # release is published, so the stamped version and download links are the new release's.
+  # The page also refreshes them from the API in the browser; stamping is what makes the
+  # download button work with JavaScript off or the API rate-limited.
+  #
+  # Needs Settings > Pages > Source set to "GitHub Actions", and a v* tag rule on the
+  # github-pages environment for the tag run to be allowed to deploy.
+  pages:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp the latest release into the pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          fallback="https://github.com/${GITHUB_REPOSITORY}/releases/latest"
+          rel=$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" || echo '{}')
+          ver=$(jq -r '.tag_name // "" | ltrimstr("v")' <<<"$rel")
+          setup=$(jq -r '[.assets[]? | select(.name | startswith("DovetailSetup-") and endswith(".exe"))][0].browser_download_url // ""' <<<"$rel")
+          zip=$(jq -r '[.assets[]? | select(.name | endswith("portable.zip"))][0].browser_download_url // ""' <<<"$rel")
+          echo "version=${ver:-none} setup=${setup:-none} zip=${zip:-none}"
+          sed -i -e "s|{{VERSION}}|${ver:-latest}|g" \
+                 -e "s|{{SETUP_URL}}|${setup:-$fallback}|g" \
+                 -e "s|{{ZIP_URL}}|${zip:-$fallback}|g" docs/*.html
+          if grep -l '{{' docs/*.html; then echo "unstamped placeholder left"; exit 1; fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - uses: actions/deploy-pages@v4

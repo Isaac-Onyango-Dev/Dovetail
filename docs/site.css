@@ -1,0 +1,112 @@
+/* Dovetail site. The palette is the app's own (src/Dovetail.App/App.xaml), so the page, the
+   installer's windows and the tray icon read as one product. Ember is the only accent. */
+:root {
+  --ink: #12151A;
+  --bg: #1E2127;
+  --panel: #282C34;
+  --line: #3A3F4B;
+  --text: #E9E6E1;
+  --dim: #9BA1AC;
+  --accent: #D9483B;
+  --button: #B8372B;          /* Ember darkened so white label text clears 4.5:1 */
+  --button-hover: #C83F33;
+  --good: #6FA36B;
+  --warn: #D8A657;
+  --plate: #E9EBEE;           /* the light "spec sheet" the product art is drawn for */
+  --head: "Space Grotesk", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --measure: 64ch;
+  --gutter: clamp(16px, 5vw, 64px);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 84px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--text);
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+img, svg { display: block; max-width: 100%; }
+p { margin: 0 0 1rem; max-width: var(--measure); }
+h1, h2, h3 { font-family: var(--head); margin: 0; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); line-height: 1.08; margin-bottom: 1rem; font-weight: 700; }
+h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.3rem; letter-spacing: -0.01em; }
+code {
+  font-family: var(--mono); font-size: 0.86em;
+  background: var(--panel); padding: 2px 6px; border-radius: 4px; overflow-wrap: anywhere;
+}
+pre { margin: 0.75rem 0; max-width: 100%; overflow-x: auto; background: var(--panel); border-radius: 6px; padding: 12px 14px; }
+pre code { padding: 0; background: none; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--gutter); }
+.dim { color: var(--dim); }
+
+/* ---- header: stays put so the mark is always on screen ---- */
+.bar {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--ink) 86%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 160ms;
+}
+.bar.scrolled { border-bottom-color: var(--line); }
+.bar .wrap { display: flex; align-items: center; gap: 24px; height: 64px; }
+.brand {
+  display: flex; align-items: center; gap: 10px; text-decoration: none;
+  font-family: var(--head); font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em;
+}
+.brand img { width: 24px; height: 24px; }
+.bar nav { display: flex; gap: 22px; margin-left: auto; font-size: 0.93rem; }
+.bar nav a { color: var(--dim); text-decoration: none; }
+.bar nav a:hover { color: var(--text); }
+.bar .btn-sm { opacity: 0; pointer-events: none; transition: opacity 160ms; }
+.bar.scrolled .btn-sm { opacity: 1; pointer-events: auto; }
+@media (max-width: 760px) { .bar nav .opt { display: none; } }
+@media (max-width: 480px) { .bar nav { display: none; } .bar .btn-sm { margin-left: auto; } }
+
+/* ---- buttons ---- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 17px 28px 17px 24px; border-radius: 10px;
+  background: var(--button); color: #fff; text-decoration: none;
+  font-family: var(--head); font-weight: 600; font-size: 1.15rem;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08) inset, 0 8px 28px -10px rgb(217 72 59 / 0.6);
+  transition: background-color 120ms, transform 120ms;
+}
+.btn:hover { background: var(--button-hover); }
+.btn:active { transform: translateY(1px); }
+.btn svg { width: 20px; height: 20px; flex: none; }
+.btn-sm { padding: 8px 14px; font-size: 0.9rem; border-radius: 8px; box-shadow: none; gap: 8px; }
+.btn-sm svg { width: 15px; height: 15px; }
+
+/* ---- section labels: a mono tick, the site's one recurring motif ---- */
+.label {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+  font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim);
+}
+.label::before {
+  content: ""; width: 34px; height: 9px; flex: none;
+  background: repeating-linear-gradient(90deg, var(--accent) 0 2px, transparent 2px 6px);
+}
+section { padding-block: clamp(64px, 9vw, 112px); border-top: 1px solid var(--line); }
+
+/* faint circuit traces behind the hero and the 404 */
+.traces { position: relative; isolation: isolate; }
+.traces::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0.5;
+  background: url("img/traces.svg") center / 720px repeat;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 30% 40%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 70% at 30% 40%, #000 20%, transparent 75%);
+}
+
+footer { border-top: 1px solid var(--line); padding-block: 36px 48px; font-size: 0.92rem; color: var(--dim); }
+footer .wrap { display: grid; grid-template-columns: auto 1fr; gap: 12px 40px; align-items: start; }
+footer p { margin: 0 0 6px; max-width: 72ch; }
+footer .brand { font-size: 1.05rem; color: var(--text); }
+footer .brand img { width: 20px; height: 20px; }
+footer .ver { font-family: var(--mono); font-size: 0.85rem; }
+@media (max-width: 640px) { footer .wrap { grid-template-columns: 1fr; } }

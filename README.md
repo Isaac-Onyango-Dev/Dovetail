@@ -1,5 +1,11 @@
 # Dovetail
 
+[![Download](https://img.shields.io/badge/download-Windows-B8372B?style=flat-square&labelColor=1E2127&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZmlsbD0iI0Q5NDgzQiIgZD0iTTE0LjgsMCBMMTQuOCwxMi4zNiBMOC44LDE2LjM2IEw4LjgsMzIgTDYsMzIgQTYsNiAwIDAgMSAwLDI2IEwwLDYgQTYsNiAwIDAgMSA2LDAgWiBNMTcuMiwwIEwxNy4yLDEzLjY0IEwxMS4yLDE3LjY0IEwxMS4yLDMyIEwyNiwzMiBBNiw2IDAgMCAwIDMyLDI2IEwzMiw2IEE2LDYgMCAwIDAgMjYsMCBaIi8+PC9zdmc+Cg==)](https://isaac-onyango-dev.github.io/Dovetail/)
+[![Latest release](https://img.shields.io/github/v/release/Isaac-Onyango-Dev/Dovetail?style=flat-square&labelColor=1E2127&color=D9483B&label=version)](https://isaac-onyango-dev.github.io/Dovetail/#changelog)
+[![Downloads](https://img.shields.io/github/downloads/Isaac-Onyango-Dev/Dovetail/total?style=flat-square&labelColor=1E2127&color=D9483B)](https://isaac-onyango-dev.github.io/Dovetail/)
+[![Build](https://img.shields.io/github/actions/workflow/status/Isaac-Onyango-Dev/Dovetail/build.yml?branch=main&style=flat-square&labelColor=1E2127)](https://github.com/Isaac-Onyango-Dev/Dovetail/actions/workflows/build.yml)
+[![MIT licence](https://img.shields.io/badge/licence-MIT-9BA1AC?style=flat-square&labelColor=1E2127)](LICENSE)
+
 **Fits your pad to the game.**
 
 Dovetail makes a generic USB gamepad work in games that only accept an Xbox controller.
@@ -28,7 +34,7 @@ detects as the real thing — no wrapper, no launch options, no per-game DLL.
 ## Install
 
 Download **`DovetailSetup-<version>.exe`** from the
-[latest release](https://github.com/Isaac-Onyango-Dev/Dovetail/releases/latest) and run it.
+[Dovetail download page](https://isaac-onyango-dev.github.io/Dovetail/) and run it.
 
 That is the whole procedure. It installs to Program Files, adds a Start Menu entry and an
 Add/Remove Programs entry, and offers to start Dovetail when it finishes. There is no runtime
@@ -92,7 +98,7 @@ To stage a complete, runnable folder the way it is installed:
 To build the installer, with [Inno Setup 6](https://jrsoftware.org/isdl.php) installed:
 
 ```powershell
-ISCC.exe /DAppVersion=1.2.0 packaging\Dovetail.iss   # -> dist\DovetailSetup-1.2.0.exe
+ISCC.exe /DAppVersion=1.2.1 packaging\Dovetail.iss   # -> dist\DovetailSetup-1.2.1.exe
 ```
 
 CI does both on every tag and attaches the results to the release. The tag and the `<Version>`
